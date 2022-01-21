@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# old example files
+layer_old.py
+neural_network_skeleton.py
+
 # C extensions
 *.so
 
