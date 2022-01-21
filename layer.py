@@ -4,11 +4,13 @@ import numpy as np
 import activation_functions as af
 
 
-class layer():
-    """Layer-class containing the nodes in a layer and all their input-weights.
-    It also stores the output-value of the nodes during forward pass."""
-    def __init__(self, input_dimension, num_nodes, weight_range, next_layer):
-        self.input_dimension = input_dimension + 1  # Add bias weights
+class Layer():
+    """
+    Layer-class containing the nodes in a layer and all their input-weights.
+    It also stores the output-value of the nodes during forward pass.
+    """
+    def __init__(self, input_dimensions: int, num_nodes: int, weight_range):
+        self.input_dimension = input_dimensions + 1  # Add bias weights
         self.num_nodes = num_nodes  # Number of nodes
         self.weights = np.zeros((self.num_nodes, self.input_dimension),
                                 dtype=np.float32)  # Create the weight matrix
@@ -25,19 +27,30 @@ class layer():
         self.weight_range = weight_range
         # next_layer contains a reference to the next layer in the network,
         # it is None if the current layer is the last layer.
+        self.next_layer = None
+
+    def set_next_layer(self, next_layer: Layer):
+        """
+        Sets the reference to the next layer in order for the data to be sent
+        directly to the next layer's forward_pass-method.
+        """
         self.next_layer = next_layer
 
     def randomize_weights(self):
-        """Randomizes the weights in the layer by creating a num_nodes x
+        """
+        Randomizes the weights in the layer by creating a num_nodes x
         input_dim matrix and setting the values to random values in the
-        specified range."""
+        specified range.
+        """
         self.weights = np.random.uniform(
             self.weight_range[0], self.weight_range[1],
             (self.num_nodes, self.input_dimension)).astype(np.float32)
 
     def forward_pass(self, input_values, activation_func=af.relu):
-        """Computes the output of the layer's nodes given their inputs and
-        the activation function."""
+        """
+        Computes the output of the layer's nodes given their inputs and
+        the activation function.
+        """
         # The input values are copied to avoid editing the list reference, then
         # an activation of 1 is appended to represent the activation of the
         # bias node.
