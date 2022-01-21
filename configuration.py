@@ -1,4 +1,4 @@
-"""Haakoas"""
+"""haakoas"""
 
 
 class Config():
