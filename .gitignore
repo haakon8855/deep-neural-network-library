@@ -7,6 +7,9 @@ __pycache__/
 layer_old.py
 neural_network_skeleton.py
 
+# vscode
+.vscode/
+
 # C extensions
 *.so
 
