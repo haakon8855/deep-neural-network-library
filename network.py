@@ -53,16 +53,21 @@ class Network():
         """
         # TODO: implement backprop
 
-    def forward_pass(self, test_x: np.ndarray):
+    def forward_pass(self, test_x: np.ndarray, minibatch=True):
         """
         Given an example test_x (single-case or minibatch),
         we want to predict its class probability. Since the layers call each
         other's forward_pass-method recursively we simply return the first
         layer's forward_pass return value.
         """
-        return self.layers[0].forward_pass(test_x)
+        if minibatch:
+            return self.layers[0].forward_pass(test_x, minibatch=minibatch)
+        answers = []
+        for case in test_x:
+            answers.append(self.layers[0].forward_pass(case, minibatch))
+        return answers
 
 
 if __name__ == "__main__":
     NET = Network("config_file")
-    NET.forward_pass(NET.test_x)
+    print(NET.forward_pass(NET.train_x, True))

@@ -5,8 +5,6 @@ from bresenham import bresenham
 import numpy as np
 from matplotlib import pyplot as plt
 
-# TODO: flattening!
-
 
 class DataGenerator():
     """
@@ -43,16 +41,12 @@ class DataGenerator():
             return None
         after_train = len(self.images) * self.split[0]
         after_validation = len(self.images) * (self.split[0] + self.split[1])
-        train_x = self.images[:int(after_train)]
+        train_x = np.array(self.images[:int(after_train)])
         train_y = self.classes[:int(after_train)]
         validation_x = self.images[int(after_train):int(after_validation)]
         validation_y = self.classes[int(after_train):int(after_validation)]
         test_x = self.images[int(after_validation):]
         test_y = self.classes[int(after_validation):]
-        if self.flattening:
-            return DataGenerator.flatten((train_x, train_y),
-                                         (validation_x, validation_y),
-                                         (test_x, test_y))
         return (train_x, train_y), (validation_x, validation_y), (test_x,
                                                                   test_y)
 
@@ -65,8 +59,11 @@ class DataGenerator():
         self.images = []
         self.classes = []
         for _ in range(amount):
-            images, classes = self.generate_one_image()
-            self.images.append(images)
+            image, classes = self.generate_one_image()
+            if self.flattening:
+                self.images.append(image.flatten())
+            else:
+                self.images.append(image)
             self.classes.append(classes)
         return self.get_images()
 
@@ -185,16 +182,6 @@ class DataGenerator():
             rand_y = randint(0, self.size - 1)
             image[rand_y][rand_x] = 1 - image[rand_y][rand_x]
         return image
-
-    @staticmethod
-    def flatten(train, valid, test):
-        train_x, train_y = train
-        valid_x, valid_y = valid
-        test_x, test_y = test
-        train_x = train_x.flatten()
-        valid_x = valid_x.flatten()
-        test_x = test_x.flatten()
-        return (train_x, train_y), (valid_x, valid_y), (test_x, test_y)
 
 
 if __name__ == "__main__":
