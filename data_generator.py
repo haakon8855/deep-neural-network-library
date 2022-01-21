@@ -47,7 +47,8 @@ class DataGenerator():
         validation_y = self.classes[int(after_train):int(after_validation)]
         test_x = self.images[int(after_validation):]
         test_y = self.classes[int(after_validation):]
-        return train_x, train_y, validation_x, validation_y, test_x, test_y
+        return (train_x, train_y), (validation_x, validation_y), (test_x,
+                                                                  test_y)
 
     def generate_images(self, amount):
         """
@@ -184,7 +185,8 @@ if __name__ == "__main__":
     # GEN = DataGenerator(11, 5, 10, 5, 10)
     # GEN = DataGenerator(50, 10, 50, 10, 50, False)
     GEN = DataGenerator(50, 20, 30, 20, 30, 0.008, (0.7, 0.2, 0.1), False)
-    TRAIN_X, TRAIN_Y, VAL_X, VAL_Y, TEST_X, TEST_Y = GEN.generate_images(10)
+    (TRAIN_X, TRAIN_Y), (VAL_X, VAL_Y), (TEST_X,
+                                         TEST_Y) = GEN.generate_images(10)
     for I, IMAGE in enumerate(TRAIN_X):
         print(TRAIN_Y[I])
         plt.imshow(IMAGE)
