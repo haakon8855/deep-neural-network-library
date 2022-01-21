@@ -17,7 +17,7 @@ class Network():
         self.config = Config.get_config(config_file)
         self.lrate = self.config["lrate"]
 
-        generator = DataGenerator(50, 20, 30, 20, 30, 0.008)
+        generator = DataGenerator(10, 5, 10, 5, 10, 0.008)
         train, validation, test = generator.generate_images(10)
         self.train_x, self.train_y = train
         self.validation_x, self.validation_y = validation
@@ -35,6 +35,7 @@ class Network():
                 input_size = last_layer_output_size
                 output_size = layer["size"]
                 weight_range = layer["wr"]
+                # TODO: activation function
                 self.layers.append(
                     Layer(input_dimensions=input_size,
                           num_nodes=output_size,
@@ -60,3 +61,8 @@ class Network():
         layer's forward_pass return value.
         """
         return self.layers[0].forward_pass(test_x)
+
+
+if __name__ == "__main__":
+    NET = Network("config_file")
+    NET.forward_pass(NET.test_x)

@@ -29,7 +29,7 @@ class Config():
                     "wr": (-0.1, 0.1),  # weight range
                 },
                 {
-                    "size": 5,
+                    "size": 4,
                     "act": "relu",
                     "wr": (-0.5, 0.5),  # weight range
                 },

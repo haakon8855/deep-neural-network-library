@@ -29,7 +29,7 @@ class Layer():
         # it is None if the current layer is the last layer.
         self.next_layer = None
 
-    def set_next_layer(self, next_layer: Layer):
+    def set_next_layer(self, next_layer: "Layer"):
         """
         Sets the reference to the next layer in order for the data to be sent
         directly to the next layer's forward_pass-method.

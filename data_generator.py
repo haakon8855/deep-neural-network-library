@@ -20,15 +20,17 @@ class DataGenerator():
                  max_height,
                  noise,
                  split=(0.7, 0.2, 0.1),
-                 centered=True):
+                 centered=True,
+                 flattening=True):
         if (n < 10 or n > 50):
             print(f"Parameter not within range: n={n}!")
         self.size = n
         self.min_dim = (min_width, min_height)
         self.max_dim = (max_width, max_height)
         self.noise = noise
-        self.centered = centered
         self.split = split
+        self.centered = centered
+        self.flattening = flattening
         self.images = None
         self.classes = None
 
@@ -47,6 +49,10 @@ class DataGenerator():
         validation_y = self.classes[int(after_train):int(after_validation)]
         test_x = self.images[int(after_validation):]
         test_y = self.classes[int(after_validation):]
+        if self.flattening:
+            return DataGenerator.flatten((train_x, train_y),
+                                         (validation_x, validation_y),
+                                         (test_x, test_y))
         return (train_x, train_y), (validation_x, validation_y), (test_x,
                                                                   test_y)
 
@@ -180,11 +186,22 @@ class DataGenerator():
             image[rand_y][rand_x] = 1 - image[rand_y][rand_x]
         return image
 
+    @staticmethod
+    def flatten(train, valid, test):
+        train_x, train_y = train
+        valid_x, valid_y = valid
+        test_x, test_y = test
+        train_x = train_x.flatten()
+        valid_x = valid_x.flatten()
+        test_x = test_x.flatten()
+        return (train_x, train_y), (valid_x, valid_y), (test_x, test_y)
+
 
 if __name__ == "__main__":
     # GEN = DataGenerator(11, 5, 10, 5, 10)
     # GEN = DataGenerator(50, 10, 50, 10, 50, False)
-    GEN = DataGenerator(50, 20, 30, 20, 30, 0.008, (0.7, 0.2, 0.1), False)
+    # GEN = DataGenerator(50, 20, 30, 20, 30, 0.008)
+    GEN = DataGenerator(11, 5, 10, 5, 10, 0.008, flattening=True)
     (TRAIN_X, TRAIN_Y), (VAL_X, VAL_Y), (TEST_X,
                                          TEST_Y) = GEN.generate_images(10)
     for I, IMAGE in enumerate(TRAIN_X):
