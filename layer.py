@@ -53,6 +53,12 @@ class Layer():
         self.next_layer = next_layer
 
     def backward_pass(self, j_l_z):
+        """
+        Computes the backward pass jacobian matrices and returns:
+            J_l_w (delta for weights),
+            J_l_wb (delta for bias weights),
+            J_l_y (J_l_z for upstream layer)
+        """
         j_l_w = j_l_z * self.j_z_w
         j_l_wb = j_l_z * self.j_z_wb
         j_l_y = j_l_z @ self.j_z_y
