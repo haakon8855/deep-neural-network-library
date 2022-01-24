@@ -21,16 +21,16 @@ class Config():
             "wrt":
             "L2",  # (global) weight regularization type
             "input":
-            100,  # size of input layer (number of input nodes)
+            2,  # size of input layer (number of input nodes)
             "layers": [
                 {
-                    "size": 50,
-                    "act": "relu",
-                    "wr": (-0.1, 0.1),  # weight range
+                    "size": 2,
+                    "act": "sigmoid",
+                    "wr": (-0.5, 0.5),  # weight range
                 },
                 {
-                    "size": 4,
-                    "act": "relu",
+                    "size": 1,
+                    "act": "sigmoid",
                     "wr": (-0.5, 0.5),  # weight range
                 },
             ],

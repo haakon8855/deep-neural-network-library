@@ -3,6 +3,20 @@
 import numpy as np
 
 
+def mse(value, target):
+    """
+    Mean squared error
+    """
+    ((value - target)**2).mean()
+
+
+def mse_der(value, target):
+    """
+    The derivative of the mean squared error
+    """
+    return ((value - target) * (2 / len(value)))
+
+
 def relu(inp):
     """
     ReLu activation function
@@ -28,6 +42,4 @@ def sigmoid_der(inp):
     """
     The derivative of the sigmoid activation function
     """
-    sigmoid_x = sigmoid(
-        inp)  # Calculate the activation of x only once to hopefully save time
-    return sigmoid_x * (1 - sigmoid_x)
+    return sigmoid(inp) * (1.0 - sigmoid(inp))
