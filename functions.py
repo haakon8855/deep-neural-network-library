@@ -14,7 +14,7 @@ def mse_der(value, target):
     """
     The derivative of the mean squared error
     """
-    return (value - target) * (2 / len(value))
+    return (value - target) * (2 / value.shape[1])
 
 
 def relu(inp):

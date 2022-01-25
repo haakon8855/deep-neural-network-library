@@ -27,7 +27,7 @@ class Layer():
         # TODO: Bias range
         self.biases = np.random.uniform(self.weight_range[0],
                                         self.weight_range[1],
-                                        (self.num_nodes, )).astype(np.float32)
+                                        (self.num_nodes, 1)).astype(np.float32)
 
         # input_vals is a vector containing the output of each node before
         # sending the results through the activation function.
@@ -59,9 +59,11 @@ class Layer():
             J_l_wb (delta for bias weights),
             J_l_y (J_l_z for upstream layer)
         """
-        j_l_w = j_l_z * self.j_z_w  # (2,1) = (1,) * (2,1)
-        j_l_wb = j_l_z * self.j_z_wb  # (1,1) = (1,) * (1,1)
-        j_l_y = j_l_z @ self.j_z_y  # (2,) = (1,) * (1,2)
+        j_l_w = j_l_z[:, np.newaxis, :] * self.j_z_w  # (2,1) = (1,) * (2,1)
+        j_l_wb = j_l_z[:, np.newaxis, :] * self.j_z_wb  # (1,1) = (1,) * (1,1)
+        j_l_y = np.einsum(
+            'ij,ijk->ik', j_l_z,
+            self.j_z_y)  # j_l_z @ self.j_z_y  # (2,) = (1,) * (1,2)
         return j_l_w, j_l_wb, j_l_y
 
     def forward_pass(self,
@@ -76,6 +78,8 @@ class Layer():
         # The input values are copied to avoid editing the list reference, then
         # an activation of 1 is appended to represent the activation of the
         # bias node.
+        asfsdf = np.einsum("ij,kj->ki", self.weights.T, input_values)  #4,2
+        vias = self.biases.reshape(1, -1)  #1,2
         raw_result = np.einsum("ij,kj->ki", self.weights.T,
                                input_values) + self.biases.reshape(1, -1)
 
@@ -98,8 +102,8 @@ class Layer():
         self.j_z_sum = np.eye(
             derivative.shape[1]) * derivative[:, np.newaxis, :]  # (2,2)
         self.j_z_y = self.j_z_sum @ self.weights.T  # (2,2)
-        self.j_z_w = np.outer(input_values, derivative)  # (2,2)
-        self.j_z_wb = np.outer([1], derivative)  # (1,2)
+        self.j_z_w = np.einsum('ij,ik->ijk', input_values, derivative)
+        self.j_z_wb = np.einsum('j,ik->ijk', [1], derivative)  # (1,2)
 
         # print("input_values: ", input_values)
         # print("raw_result: ", raw_result)
