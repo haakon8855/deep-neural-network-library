@@ -26,12 +26,12 @@ class Config():
                 {
                     "size": 2,
                     "act": "sigmoid",
-                    "wr": (-0.5, 0.5),  # weight range
+                    "wr": (0.5, 0.5),  # weight range
                 },
                 {
                     "size": 1,
                     "act": "sigmoid",
-                    "wr": (-0.5, 0.5),  # weight range
+                    "wr": (0.5, 0.5),  # weight range
                 },
             ],
         }

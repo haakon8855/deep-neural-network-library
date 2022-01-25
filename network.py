@@ -67,9 +67,9 @@ class Network():
         """
         # TODO: Can be removed later:
         # Randomize order of examples in XOR
-        permutation = np.random.permutation(len(self.train_x))
-        self.train_x = self.train_x[permutation]
-        self.train_y = self.train_y[permutation]
+        # permutation = np.random.permutation(len(self.train_x))
+        # self.train_x = self.train_x[permutation]
+        # self.train_y = self.train_y[permutation]
 
         # For each example in training set
         for i in range(len(self.train_x)):
@@ -122,6 +122,7 @@ class Network():
         # Call forward pass on first layer (after input layer). This layer
         # calls the next layers recursively and returns the result when
         # the last layer is reached.
+        print("\n\nRUNNING")
         if not minibatch:
             test_x = test_x.reshape(1, -1)
         return self.layers[0].forward_pass(test_x, minibatch=minibatch)
@@ -130,15 +131,15 @@ class Network():
 if __name__ == "__main__":
     NET = Network("config_file")
 
-    for k in range(len(NET.train_x)):
-        print("input: ", NET.train_x[k], "", end="")
-        print("result: ", NET.forward_pass(NET.train_x[k]))
+    # for k in range(len(NET.train_x)):
+    #     print("input: ", NET.train_x[k], "", end="")
+    #     print("result: ", NET.forward_pass(NET.train_x[k]))
 
-    print("input: ", NET.train_x, "", end="")
-    print("result: ", NET.forward_pass(NET.train_x, True))
-    for _ in range(5000):
+    # print("input: ", NET.train_x, "", end="")
+    # print("result: ", NET.forward_pass(NET.train_x, True))
+    for _ in range(1):
         NET.backward_pass()
-    print()
-    for k in range(len(NET.train_x)):
-        print("input: ", NET.train_x[k], "", end="")
-        print("result: ", NET.forward_pass(NET.train_x[k]))
+    # print()
+    # for k in range(len(NET.train_x)):
+    #     print("input: ", NET.train_x[k], "", end="")
+    #     print("result: ", NET.forward_pass(NET.train_x[k]))

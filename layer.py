@@ -101,6 +101,15 @@ class Layer():
         self.j_z_w = np.outer(input_values, derivative)  # (2,2)
         self.j_z_wb = np.outer([1], derivative)  # (1,2)
 
+        print("input_values: ", input_values)
+        print("raw_result: ", raw_result)
+        print("output_vals: ", self.output_vals)
+        print("derivative: ", derivative)
+        print("self.j_z_sum: ", self.j_z_sum)
+        print("self.j_z_y: ", self.j_z_y)
+        print("self.j_z_w: ", self.j_z_w)
+        print("self.j_z_wb: ", self.j_z_wb)
+
         # And return the output
         if self.next_layer is not None:
             return self.next_layer.forward_pass(self.output_vals)
