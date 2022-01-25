@@ -12,22 +12,30 @@ class Layer():
     def __init__(self,
                  input_dimensions: int,
                  num_nodes: int,
-                 weight_range=(-0.5, 0.5)):
+                 lrate: float,
+                 weight_range=(-0.5, 0.5),
+                 bias_range=(-0.5, 0.5),
+                 activation_func=funcs.sigmoid,
+                 activation_func_der=funcs.sigmoid_der):
         self.input_dimension = input_dimensions  # Add bias weights
         self.num_nodes = num_nodes  # Number of nodes
+        self.lrate = lrate  # Layer-specific learning rate
 
         # weight_range contains the minimum and maximum parameters for the
         # randomized initial weights.
         self.weight_range = weight_range
+        self.bias_range = bias_range
 
         # initialize weights randomly
         self.weights = np.random.uniform(
             self.weight_range[0], self.weight_range[1],
             (self.input_dimension, self.num_nodes)).astype(np.float32)
-        # TODO: Bias range
-        self.biases = np.random.uniform(self.weight_range[0],
-                                        self.weight_range[1],
+        self.biases = np.random.uniform(self.bias_range[0], self.bias_range[1],
                                         (self.num_nodes, 1)).astype(np.float32)
+
+        # Store activation function and its derivative function
+        self.activation_func = activation_func
+        self.activation_func_der = activation_func_der
 
         # input_vals is a vector containing the output of each node before
         # sending the results through the activation function.
@@ -64,11 +72,7 @@ class Layer():
         j_l_y = np.einsum('ij,ijk->ik', j_l_z, self.j_z_y)
         return j_l_w, j_l_wb, j_l_y
 
-    def forward_pass(self,
-                     input_values,
-                     activation_func=funcs.sigmoid,
-                     activation_func_der=funcs.sigmoid_der,
-                     minibatch=False):
+    def forward_pass(self, input_values):
         """
         Computes the output of the layer's nodes given their inputs and
         the activation function.
@@ -76,17 +80,15 @@ class Layer():
         # The input values are copied to avoid editing the list reference, then
         # an activation of 1 is appended to represent the activation of the
         # bias node.
-        asfsdf = np.einsum("ij,kj->ki", self.weights.T, input_values)  #4,2
-        vias = self.biases.reshape(1, -1)  #1,2
         raw_result = np.einsum("ij,kj->ki", self.weights.T,
                                input_values) + self.biases.reshape(1, -1)
 
         # We store the temporary values
         self.input_vals = raw_result
-        self.output_vals = activation_func(raw_result).astype(np.float32)
+        self.output_vals = self.activation_func(raw_result).astype(np.float32)
 
         # Compute Jacobian matrices before we return value
-        derivative = activation_func_der(raw_result)
+        derivative = self.activation_func_der(raw_result)
         self.j_z_sum = np.eye(derivative.shape[1]) * derivative[:,
                                                                 np.newaxis, :]
         self.j_z_y = self.j_z_sum @ self.weights.T
@@ -97,3 +99,11 @@ class Layer():
         if self.next_layer is not None:
             return self.next_layer.forward_pass(self.output_vals)
         return self.output_vals
+
+    def update_weights(self, delta_w, delta_b):
+        """
+        Updates weights and biases given by adding them and scaling them
+        according to the layer's learning rate.
+        """
+        self.weights = self.weights - self.lrate * delta_w
+        self.biases = (self.biases - self.lrate * delta_b.reshape(-1, 1))

@@ -3,7 +3,6 @@
 import numpy as np
 
 from layer import Layer
-from layer_softmax import LayerSoftmax
 from data_generator import DataGenerator
 from configuration import Config
 import functions as funcs
@@ -45,19 +44,27 @@ class Network():
                 input_size = last_layer_output_size
                 output_size = layer["size"]
                 weight_range = layer["wr"]
-                # TODO: activation function
+                bias_range = layer["br"]
+                lrate = layer["lrate"]
+                if layer["act"] == "sigmoid":
+                    activation_func = funcs.sigmoid
+                    activation_func_der = funcs.sigmoid_der
+                elif layer["act"] == "relu":
+                    activation_func = funcs.relu
+                    activation_func_der = funcs.relu_der
                 self.layers.append(
                     Layer(input_dimensions=input_size,
                           num_nodes=output_size,
-                          weight_range=weight_range))
+                          weight_range=weight_range,
+                          lrate=lrate,
+                          bias_range=bias_range,
+                          activation_func=activation_func,
+                          activation_func_der=activation_func_der))
                 last_layer_output_size = output_size
             else:
                 if layer["type"] == "softmax":
-                    input_size = last_layer_output_size
-                    output_size = input_size
-                    self.layers.append(
-                        LayerSoftmax(input_dimensions=input_size,
-                                     num_nodes=output_size))
+                    pass
+                    # TODO: softmax
         for i in range(0, len(self.layers) - 1):
             self.layers[i].set_next_layer(self.layers[i + 1])
 
@@ -65,12 +72,6 @@ class Network():
         """
         Runs backprop on the network to modify its weights and thus training it.
         """
-        # # TODO: Can be removed later:
-        # # Randomize order of examples in XOR
-        # permutation = np.random.permutation(len(self.train_x))
-        # self.train_x = self.train_x[permutation]
-        # self.train_y = self.train_y[permutation]
-
         # For each example in training set
         target_vals = self.train_y  # Extract example target values
         # Run forward pass and cache in-between computations
@@ -80,29 +81,23 @@ class Network():
         deltas = []
 
         # For j from n-1 to 0 (incl.) where n is number of layers
-        for j in range(len(self.layers) - 1, -1, -1):
-            layer = self.layers[j]
-            # Perform backward pass for layer j and get jacobians and
-            # delta values for updating layer j's weights.
+        for i in range(len(self.layers) - 1, -1, -1):
+            layer = self.layers[i]
+            # Perform the backward pass for layer j and get the jacobian
+            # matrices and delta values for updating layer j's weights.
             delta_j, delta_jb, j_l_z = layer.backward_pass(j_l_z)
             # Cache deltas in order to update them later
             deltas.append((delta_j, delta_jb))
 
         # For j from 0 to n-1 (incl.) where n is length of 'deltas'
-        for j in range(len(deltas)):
-            # TODO: learning rate ref to layer here
-            learning_rate = 0.75
+        for i in range(len(deltas)):
             # Fetch the delta values corresponding to layer j.
             # Since 'deltas' is reversed in relation to layer order in
             # 'self.layers' we fetch with index = len(deltas) - j - 1
-            delta_w, delta_b = deltas[len(deltas) - j - 1]
+            delta_w, delta_b = deltas[len(deltas) - i - 1]
             delta_w = delta_w.mean(axis=0)
             delta_b = delta_b.mean(axis=0)
-            # TODO: Do this in Layer-class?
-            self.layers[
-                j].weights = self.layers[j].weights - learning_rate * delta_w
-            self.layers[j].biases = (self.layers[j].biases -
-                                     learning_rate * delta_b.reshape(-1, 1))
+            self.layers[i].update_weights(delta_w, delta_b)
 
     def forward_pass(self, test_x: np.ndarray, minibatch=False):
         """
@@ -116,16 +111,16 @@ class Network():
         # the last layer is reached.
         if not minibatch:
             test_x = test_x.reshape(1, -1)
-        return self.layers[0].forward_pass(test_x, minibatch=minibatch)
+        return self.layers[0].forward_pass(test_x)
 
 
 if __name__ == "__main__":
     NET = Network("config_file")
 
     print("input: ", NET.train_x, "", end="")
-    print("result: ", NET.forward_pass(NET.train_x, True))
+    print("result: \n", NET.forward_pass(NET.train_x, True))
 
-    for i in range(10000):
+    for _ in range(10000):
         NET.backward_pass()
 
     print()

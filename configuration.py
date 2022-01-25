@@ -26,12 +26,16 @@ class Config():
                 {
                     "size": 2,
                     "act": "sigmoid",
+                    "lrate": 0.75,
                     "wr": (-0.5, 0.5),  # weight range
+                    "br": (-0.5, 0.5),  # bias range
                 },
                 {
                     "size": 1,
                     "act": "sigmoid",
+                    "lrate": 0.75,
                     "wr": (-0.5, 0.5),  # weight range
+                    "br": (-0.5, 0.5),  # bias range
                 },
             ],
         }
