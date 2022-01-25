@@ -1,6 +1,7 @@
 """haakoas"""
 
 import numpy as np
+from time import time
 
 from layer import Layer
 from layer_softmax import LayerSoftmax
@@ -134,8 +135,11 @@ if __name__ == "__main__":
     # print("result: ", NET.forward_pass(NET.train_x[k], False))
     # print("input: ", NET.train_x, "", end="")
     # print("result: ", NET.forward_pass(NET.train_x, True))
-    for _ in range(5000):
+    before = time()
+    for i in range(10000):
         NET.backward_pass()
+    after = time()
+    print(f"time elapsed: {after-before}")
     print()
     for k in range(len(NET.train_x)):
         print("input: ", NET.train_x[k], "", end="")
