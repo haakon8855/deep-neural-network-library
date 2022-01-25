@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
     # print("input: ", NET.train_x, "", end="")
     # print("result: ", NET.forward_pass(NET.train_x, True))
-    for _ in range(1):
+    for _ in range(100):
         NET.backward_pass()
     # print()
     # for k in range(len(NET.train_x)):
