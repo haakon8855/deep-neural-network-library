@@ -100,14 +100,22 @@ class Network():
                 delta_w, delta_b = deltas[len(deltas) - j - 1]
                 delta_w = delta_w.mean(axis=0)
                 delta_b = delta_b.mean(axis=0)
+                print("\n\nRUNNING")
+                # print("j: ", j)
+                # print("delta_w: ", delta_w)
+                # print("delta_b: ", delta_b)
                 # Update weights and biases by subtracting deltas multiplied
                 # by the learning rate.
                 # TODO: Do this in Layer-class?
+                print("blayer", j, self.layers[j].weights)
+                print("bbias", j, self.layers[j].biases)
                 self.layers[j].weights = self.layers[
                     j].weights - learning_rate * delta_w
                 self.layers[j].biases = (self.layers[j].biases -
                                          learning_rate * delta_b).reshape(
                                              self.layers[j].biases.shape)
+                print("alayer", j, self.layers[j].weights)
+                print("abias", j, self.layers[j].biases)
 
     def forward_pass(self, test_x: np.ndarray, minibatch=False):
         """
@@ -122,7 +130,6 @@ class Network():
         # Call forward pass on first layer (after input layer). This layer
         # calls the next layers recursively and returns the result when
         # the last layer is reached.
-        print("\n\nRUNNING")
         if not minibatch:
             test_x = test_x.reshape(1, -1)
         return self.layers[0].forward_pass(test_x, minibatch=minibatch)
