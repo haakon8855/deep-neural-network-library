@@ -76,7 +76,7 @@ class Network():
             input_val = self.train_x[i]  # Extract example input values
             target_val = self.train_y[i]  # Extract example target values
             # Run forward pass and cache in-between computations
-            prediction = self.forward_pass(input_val)
+            prediction = self.forward_pass(input_val).reshape(-1, 1)
             # Compute initial jacobian from loss function to z-output
             j_l_z = funcs.mse_der(prediction, target_val)
             deltas = []
@@ -107,7 +107,7 @@ class Network():
                                          learning_rate * delta_b).reshape(
                                              self.layers[j].biases.shape)
 
-    def forward_pass(self, test_x: np.ndarray):
+    def forward_pass(self, test_x: np.ndarray, minibatch=False):
         """
         Given an example test_x (single-case or minibatch),
         we want to predict its class probability. Since the layers call each
@@ -120,7 +120,9 @@ class Network():
         # Call forward pass on first layer (after input layer). This layer
         # calls the next layers recursively and returns the result when
         # the last layer is reached.
-        return self.layers[0].forward_pass(test_x)
+        if not minibatch:
+            test_x = test_x.reshape(-1, 1)
+        return self.layers[0].forward_pass(test_x, minibatch=minibatch)
 
 
 if __name__ == "__main__":
@@ -129,6 +131,9 @@ if __name__ == "__main__":
     for k in range(len(NET.train_x)):
         print("input: ", NET.train_x[k], "", end="")
         print("result: ", NET.forward_pass(NET.train_x[k]))
+    # print("result: ", NET.forward_pass(NET.train_x[k], False))
+    # print("input: ", NET.train_x, "", end="")
+    # print("result: ", NET.forward_pass(NET.train_x, True))
     for _ in range(5000):
         NET.backward_pass()
     print()
