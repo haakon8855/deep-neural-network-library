@@ -154,6 +154,7 @@ if __name__ == "__main__":
     # for i in range(len(NET.layers)):
     #     print("layer", i, NET.layers[i].weights)
     #     print("bias", i, NET.layers[i].biases)
+    print()
     for k in range(len(NET.train_x)):
         print("input: ", NET.train_x[k], "", end="")
         print("result: ", NET.forward_pass(NET.train_x[k]))
