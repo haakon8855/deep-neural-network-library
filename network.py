@@ -33,6 +33,7 @@ class Network():
                                  [1.0, 0.0]])
         self.test_x = self.train_x
         self.test_y = self.train_y
+        self.use_softmax = False
 
         self.populate_layers()  # Create layer-objects
 
@@ -41,32 +42,28 @@ class Network():
         Create the layer-class instances and add them to the list of layers.
         """
         last_layer_output_size = self.config["input"]
+        self.use_softmax = self.config["softmax"]
         for layer in self.config["layers"]:
-            if "size" in layer:  # layer is a normal layer
-                input_size = last_layer_output_size
-                output_size = layer["size"]
-                weight_range = layer["wr"]
-                bias_range = layer["br"]
-                lrate = layer["lrate"]
-                if layer["act"] == "sigmoid":
-                    activation_func = funcs.sigmoid
-                    activation_func_der = funcs.sigmoid_der
-                elif layer["act"] == "relu":
-                    activation_func = funcs.relu
-                    activation_func_der = funcs.relu_der
-                self.layers.append(
-                    Layer(input_dimensions=input_size,
-                          num_nodes=output_size,
-                          weight_range=weight_range,
-                          lrate=lrate,
-                          bias_range=bias_range,
-                          activation_func=activation_func,
-                          activation_func_der=activation_func_der))
-                last_layer_output_size = output_size
-            else:
-                if layer["type"] == "softmax":
-                    pass
-                    # TODO: softmax
+            input_size = last_layer_output_size
+            output_size = layer["size"]
+            weight_range = layer["wr"]
+            bias_range = layer["br"]
+            lrate = layer["lrate"]
+            if layer["act"] == "sigmoid":
+                activation_func = funcs.sigmoid
+                activation_func_der = funcs.sigmoid_der
+            elif layer["act"] == "relu":
+                activation_func = funcs.relu
+                activation_func_der = funcs.relu_der
+            self.layers.append(
+                Layer(input_dimensions=input_size,
+                      num_nodes=output_size,
+                      weight_range=weight_range,
+                      lrate=lrate,
+                      bias_range=bias_range,
+                      activation_func=activation_func,
+                      activation_func_der=activation_func_der))
+            last_layer_output_size = output_size
         for i in range(0, len(self.layers) - 1):
             self.layers[i].set_next_layer(self.layers[i + 1])
 
@@ -78,9 +75,15 @@ class Network():
         target_vals = self.train_y  # Extract example target values
         # Run forward pass and cache in-between computations
         prediction = self.forward_pass(self.train_x, True)
-        # Compute initial jacobian from loss function to z-output
+        # Compute initial jacobian from loss function to softmax-output
         tval = target_vals.reshape(target_vals.shape[0], -1)
-        j_l_z = funcs.mse_der(prediction, tval)
+        if self.use_softmax:
+            j_l_s = funcs.mse_der(prediction, tval)
+            # Compute j_s_z jacobian from softmax output to last layer output
+            j_s_z = funcs.j_soft(prediction)
+            j_l_z = np.einsum('ij,ijk->ik', j_l_s, j_s_z)
+        else:
+            j_l_z = funcs.mse_der(prediction, tval)
         deltas = []
 
         # For j from n-1 to 0 (incl.) where n is number of layers
@@ -114,7 +117,10 @@ class Network():
         # the last layer is reached.
         if not minibatch:
             test_x = test_x.reshape(1, -1)
-        return self.layers[0].forward_pass(test_x)
+        z_output = self.layers[0].forward_pass(test_x)
+        if self.use_softmax:
+            return funcs.softmax(z_output)
+        return z_output
 
 
 if __name__ == "__main__":

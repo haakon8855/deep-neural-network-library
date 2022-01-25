@@ -22,6 +22,8 @@ class Config():
             "L2",  # (global) weight regularization type
             "input":
             2,  # size of input layer (number of input nodes)
+            "softmax":
+            False,
             "layers": [
                 {
                     "size": 100,
