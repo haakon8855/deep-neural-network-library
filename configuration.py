@@ -24,14 +24,14 @@ class Config():
             2,  # size of input layer (number of input nodes)
             "layers": [
                 {
-                    "size": 2,
+                    "size": 100,
                     "act": "sigmoid",
                     "lrate": 0.75,
                     "wr": (-0.5, 0.5),  # weight range
                     "br": (-0.5, 0.5),  # bias range
                 },
                 {
-                    "size": 1,
+                    "size": 2,
                     "act": "sigmoid",
                     "lrate": 0.75,
                     "wr": (-0.5, 0.5),  # weight range

@@ -29,6 +29,8 @@ class Network():
         self.train_x = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0],
                                  [1.0, 1.0]])
         self.train_y = np.array([0.0, 1.0, 1.0, 0.0])
+        self.train_y = np.array([[1.0, 0.0], [0.0, 1.0], [0.0, 1.0],
+                                 [1.0, 0.0]])
         self.test_x = self.train_x
         self.test_y = self.train_y
 
@@ -75,9 +77,10 @@ class Network():
         # For each example in training set
         target_vals = self.train_y  # Extract example target values
         # Run forward pass and cache in-between computations
-        prediction = self.forward_pass(self.train_x, True).reshape(-1, 1)
+        prediction = self.forward_pass(self.train_x, True)
         # Compute initial jacobian from loss function to z-output
-        j_l_z = funcs.mse_der(prediction, target_vals.reshape(-1, 1))
+        tval = target_vals.reshape(target_vals.shape[0], -1)
+        j_l_z = funcs.mse_der(prediction, tval)
         deltas = []
 
         # For j from n-1 to 0 (incl.) where n is number of layers
