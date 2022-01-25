@@ -68,45 +68,52 @@ class Network():
         """
         # TODO: Can be removed later:
         # Randomize order of examples in XOR
-        permutation = np.random.permutation(len(self.train_x))
-        self.train_x = self.train_x[permutation]
-        self.train_y = self.train_y[permutation]
+        # permutation = np.random.permutation(len(self.train_x))
+        # self.train_x = self.train_x[permutation]
+        # self.train_y = self.train_y[permutation]
 
         # For each example in training set
-        for i in range(len(self.train_x)):
-            input_val = self.train_x[i]  # Extract example input values
-            target_val = self.train_y[i]  # Extract example target values
-            # Run forward pass and cache in-between computations
-            prediction = self.forward_pass(input_val).reshape(-1, 1)
-            # Compute initial jacobian from loss function to z-output
-            j_l_z = funcs.mse_der(prediction, target_val)
-            deltas = []
+        target_vals = self.train_y  # Extract example target values
+        # Run forward pass and cache in-between computations
+        prediction = self.forward_pass(self.train_x, True).reshape(-1, 1)
+        # Compute initial jacobian from loss function to z-output
+        j_l_z = funcs.mse_der(prediction, target_vals.reshape(-1, 1))
+        deltas = []
 
-            # For j from n-1 to 0 (incl.) where n is number of layers
-            for j in range(len(self.layers) - 1, -1, -1):
-                layer = self.layers[j]
-                # Perform backward pass for layer j and get jacobians and
-                # delta values for updating layer j's weights.
-                delta_j, delta_jb, j_l_z = layer.backward_pass(j_l_z)
-                # Cache deltas in order to update them later
-                deltas.append((delta_j, delta_jb))
+        # For j from n-1 to 0 (incl.) where n is number of layers
+        for j in range(len(self.layers) - 1, -1, -1):
+            layer = self.layers[j]
+            # Perform backward pass for layer j and get jacobians and
+            # delta values for updating layer j's weights.
+            delta_j, delta_jb, j_l_z = layer.backward_pass(j_l_z)
+            # Cache deltas in order to update them later
+            deltas.append((delta_j, delta_jb))
 
-            # For j from 0 to n-1 (incl.) where n is length of 'deltas'
-            for j in range(len(deltas)):
-                # TODO: learning rate ref to layer here
-                learning_rate = 0.75
-                # Fetch the delta values corresponding to layer j.
-                # Since 'deltas' is reversed in relation to layer order in
-                # 'self.layers' we fetch with index = len(deltas) - j - 1
-                delta_w, delta_b = deltas[len(deltas) - j - 1]
-                # Update weights and biases by subtracting deltas multiplied
-                # by the learning rate.
-                # TODO: Do this in Layer-class?
-                self.layers[j].weights = self.layers[
-                    j].weights - learning_rate * delta_w
-                self.layers[j].biases = (self.layers[j].biases -
-                                         learning_rate * delta_b).reshape(
-                                             self.layers[j].biases.shape)
+        # For j from 0 to n-1 (incl.) where n is length of 'deltas'
+        for j in range(len(deltas)):
+            # TODO: learning rate ref to layer here
+            learning_rate = 0.75
+            # Fetch the delta values corresponding to layer j.
+            # Since 'deltas' is reversed in relation to layer order in
+            # 'self.layers' we fetch with index = len(deltas) - j - 1
+            delta_w, delta_b = deltas[len(deltas) - j - 1]
+            delta_w = delta_w.mean(axis=0)
+            delta_b = delta_b.mean(axis=0)
+            # print("\n\nRUNNING")
+            # print("j: ", j)
+            # print("delta_w: ", delta_w)
+            # print("delta_b: ", delta_b)
+            # Update weights and biases by subtracting deltas multiplied
+            # by the learning rate.
+            # TODO: Do this in Layer-class?
+            # print("blayer", j, self.layers[j].weights)
+            # print("bbias", j, self.layers[j].biases)
+            self.layers[
+                j].weights = self.layers[j].weights - learning_rate * delta_w
+            self.layers[j].biases = (self.layers[j].biases -
+                                     learning_rate * delta_b.reshape(-1, 1))
+            # print("alayer", j, self.layers[j].weights)
+            # print("abias", j, self.layers[j].biases)
 
     def forward_pass(self, test_x: np.ndarray, minibatch=False):
         """
@@ -122,17 +129,17 @@ class Network():
         # calls the next layers recursively and returns the result when
         # the last layer is reached.
         if not minibatch:
-            test_x = test_x.reshape(-1, 1)
+            test_x = test_x.reshape(1, -1)
         return self.layers[0].forward_pass(test_x, minibatch=minibatch)
 
 
 if __name__ == "__main__":
     NET = Network("config_file")
 
-    for k in range(len(NET.train_x)):
-        print("input: ", NET.train_x[k], "", end="")
-        print("result: ", NET.forward_pass(NET.train_x[k]))
-    # print("result: ", NET.forward_pass(NET.train_x[k], False))
+    # for k in range(len(NET.train_x)):
+    #     print("input: ", NET.train_x[k], "", end="")
+    #     print("result: ", NET.forward_pass(NET.train_x[k]))
+
     # print("input: ", NET.train_x, "", end="")
     # print("result: ", NET.forward_pass(NET.train_x, True))
     before = time()
@@ -140,7 +147,18 @@ if __name__ == "__main__":
         NET.backward_pass()
     after = time()
     print(f"time elapsed: {after-before}")
+    # print()
+    # for k in range(len(NET.train_x)):
+    #     print("input: ", NET.train_x[k], "", end="")
+    #     print("result: ", NET.forward_pass(NET.train_x[k]))
+    # for i in range(len(NET.layers)):
+    #     print("layer", i, NET.layers[i].weights)
+    #     print("bias", i, NET.layers[i].biases)
     print()
     for k in range(len(NET.train_x)):
         print("input: ", NET.train_x[k], "", end="")
         print("result: ", NET.forward_pass(NET.train_x[k]))
+
+    for i in range(len(NET.layers)):
+        print("layer", i, NET.layers[i].weights)
+        print("bias", i, NET.layers[i].biases)
