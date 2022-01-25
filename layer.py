@@ -59,11 +59,9 @@ class Layer():
             J_l_wb (delta for bias weights),
             J_l_y (J_l_z for upstream layer)
         """
-        j_l_w = j_l_z[:, np.newaxis, :] * self.j_z_w  # (2,1) = (1,) * (2,1)
-        j_l_wb = j_l_z[:, np.newaxis, :] * self.j_z_wb  # (1,1) = (1,) * (1,1)
-        j_l_y = np.einsum(
-            'ij,ijk->ik', j_l_z,
-            self.j_z_y)  # j_l_z @ self.j_z_y  # (2,) = (1,) * (1,2)
+        j_l_w = j_l_z[:, np.newaxis, :] * self.j_z_w
+        j_l_wb = j_l_z[:, np.newaxis, :] * self.j_z_wb
+        j_l_y = np.einsum('ij,ijk->ik', j_l_z, self.j_z_y)
         return j_l_w, j_l_wb, j_l_y
 
     def forward_pass(self,
@@ -83,36 +81,17 @@ class Layer():
         raw_result = np.einsum("ij,kj->ki", self.weights.T,
                                input_values) + self.biases.reshape(1, -1)
 
-        # weights.T (2,2)
-        # input_values = (2,)
         # We store the temporary values
-        self.input_vals = raw_result  # (2,)
-        self.output_vals = activation_func(raw_result).astype(
-            np.float32)  # (2,)
+        self.input_vals = raw_result
+        self.output_vals = activation_func(raw_result).astype(np.float32)
 
         # Compute Jacobian matrices before we return value
-        # derivative = activation_func_der(raw_result).reshape(-1, )  # (2,)
-        # self.j_z_sum = np.diag(derivative)  # (2,2)
-        # self.j_z_y = self.j_z_sum @ self.weights.T  # (2,2)
-        # self.j_z_w = np.outer(input_values, np.diag(self.j_z_sum))  # (2,2)
-        # self.j_z_wb = np.outer([1], np.diag(self.j_z_sum))  # (1,2)
-
-        # new
-        derivative = activation_func_der(raw_result)  # (2,)
-        self.j_z_sum = np.eye(
-            derivative.shape[1]) * derivative[:, np.newaxis, :]  # (2,2)
-        self.j_z_y = self.j_z_sum @ self.weights.T  # (2,2)
+        derivative = activation_func_der(raw_result)
+        self.j_z_sum = np.eye(derivative.shape[1]) * derivative[:,
+                                                                np.newaxis, :]
+        self.j_z_y = self.j_z_sum @ self.weights.T
         self.j_z_w = np.einsum('ij,ik->ijk', input_values, derivative)
-        self.j_z_wb = np.einsum('j,ik->ijk', [1], derivative)  # (1,2)
-
-        # print("input_values: ", input_values)
-        # print("raw_result: ", raw_result)
-        # print("output_vals: ", self.output_vals)
-        # print("derivative: ", derivative)
-        # print("self.j_z_sum: ", self.j_z_sum)
-        # print("self.j_z_y: ", self.j_z_y)
-        # print("self.j_z_w: ", self.j_z_w)
-        # print("self.j_z_wb: ", self.j_z_wb)
+        self.j_z_wb = np.einsum('j,ik->ijk', [1], derivative)
 
         # And return the output
         if self.next_layer is not None:
