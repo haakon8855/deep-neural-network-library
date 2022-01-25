@@ -76,8 +76,8 @@ class Layer():
         # The input values are copied to avoid editing the list reference, then
         # an activation of 1 is appended to represent the activation of the
         # bias node.
-        raw_result = np.einsum("ij,jk->ik", self.weights.T,
-                               input_values) + self.biases.reshape(-1, 1)
+        raw_result = np.einsum("ij,kj->ki", self.weights.T,
+                               input_values) + self.biases.reshape(1, -1)
 
         # weights.T (2,2)
         # input_values = (2,)
@@ -87,11 +87,19 @@ class Layer():
             np.float32)  # (2,)
 
         # Compute Jacobian matrices before we return value
-        derivative = activation_func_der(raw_result).reshape(-1, )  # (2,)
-        self.j_z_sum = np.diag(derivative)  # (2,2)
+        # derivative = activation_func_der(raw_result).reshape(-1, )  # (2,)
+        # self.j_z_sum = np.diag(derivative)  # (2,2)
+        # self.j_z_y = self.j_z_sum @ self.weights.T  # (2,2)
+        # self.j_z_w = np.outer(input_values, np.diag(self.j_z_sum))  # (2,2)
+        # self.j_z_wb = np.outer([1], np.diag(self.j_z_sum))  # (1,2)
+
+        # new
+        derivative = activation_func_der(raw_result)  # (2,)
+        self.j_z_sum = np.eye(
+            derivative.shape[1]) * derivative[:, np.newaxis, :]  # (2,2)
         self.j_z_y = self.j_z_sum @ self.weights.T  # (2,2)
-        self.j_z_w = np.outer(input_values, np.diag(self.j_z_sum))  # (2,2)
-        self.j_z_wb = np.outer([1], np.diag(self.j_z_sum))  # (1,2)
+        self.j_z_w = np.outer(input_values, derivative)  # (2,2)
+        self.j_z_wb = np.outer([1], derivative)  # (1,2)
 
         # And return the output
         if self.next_layer is not None:

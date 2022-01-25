@@ -98,6 +98,8 @@ class Network():
                 # Since 'deltas' is reversed in relation to layer order in
                 # 'self.layers' we fetch with index = len(deltas) - j - 1
                 delta_w, delta_b = deltas[len(deltas) - j - 1]
+                delta_w = delta_w.mean(axis=0)
+                delta_b = delta_b.mean(axis=0)
                 # Update weights and biases by subtracting deltas multiplied
                 # by the learning rate.
                 # TODO: Do this in Layer-class?
@@ -121,7 +123,7 @@ class Network():
         # calls the next layers recursively and returns the result when
         # the last layer is reached.
         if not minibatch:
-            test_x = test_x.reshape(-1, 1)
+            test_x = test_x.reshape(1, -1)
         return self.layers[0].forward_pass(test_x, minibatch=minibatch)
 
 
@@ -131,9 +133,9 @@ if __name__ == "__main__":
     for k in range(len(NET.train_x)):
         print("input: ", NET.train_x[k], "", end="")
         print("result: ", NET.forward_pass(NET.train_x[k]))
-    # print("result: ", NET.forward_pass(NET.train_x[k], False))
-    # print("input: ", NET.train_x, "", end="")
-    # print("result: ", NET.forward_pass(NET.train_x, True))
+
+    print("input: ", NET.train_x, "", end="")
+    print("result: ", NET.forward_pass(NET.train_x, True))
     for _ in range(5000):
         NET.backward_pass()
     print()
