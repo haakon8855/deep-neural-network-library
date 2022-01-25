@@ -100,22 +100,22 @@ class Network():
                 delta_w, delta_b = deltas[len(deltas) - j - 1]
                 delta_w = delta_w.mean(axis=0)
                 delta_b = delta_b.mean(axis=0)
-                print("\n\nRUNNING")
+                # print("\n\nRUNNING")
                 # print("j: ", j)
                 # print("delta_w: ", delta_w)
                 # print("delta_b: ", delta_b)
                 # Update weights and biases by subtracting deltas multiplied
                 # by the learning rate.
                 # TODO: Do this in Layer-class?
-                print("blayer", j, self.layers[j].weights)
-                print("bbias", j, self.layers[j].biases)
+                # print("blayer", j, self.layers[j].weights)
+                # print("bbias", j, self.layers[j].biases)
                 self.layers[j].weights = self.layers[
                     j].weights - learning_rate * delta_w
                 self.layers[j].biases = (self.layers[j].biases -
                                          learning_rate * delta_b).reshape(
                                              self.layers[j].biases.shape)
-                print("alayer", j, self.layers[j].weights)
-                print("abias", j, self.layers[j].biases)
+                # print("alayer", j, self.layers[j].weights)
+                # print("abias", j, self.layers[j].biases)
 
     def forward_pass(self, test_x: np.ndarray, minibatch=False):
         """
@@ -144,9 +144,12 @@ if __name__ == "__main__":
 
     # print("input: ", NET.train_x, "", end="")
     # print("result: ", NET.forward_pass(NET.train_x, True))
-    for _ in range(100):
+    for _ in range(5000):
         NET.backward_pass()
     # print()
     # for k in range(len(NET.train_x)):
     #     print("input: ", NET.train_x[k], "", end="")
     #     print("result: ", NET.forward_pass(NET.train_x[k]))
+    for i in range(len(NET.layers)):
+        print("layer", i, NET.layers[i].weights)
+        print("bias", i, NET.layers[i].biases)
