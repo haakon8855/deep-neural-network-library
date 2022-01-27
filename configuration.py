@@ -13,7 +13,7 @@ class Config():
         """
         return {
             "loss":
-            "cross_entropy",  # (global) loss function
+            "mse",  # (global) loss function
             "lrate":
             0.1,  # (global) learning rate
             "wreg":

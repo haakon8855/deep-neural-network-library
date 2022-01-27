@@ -7,7 +7,9 @@ def mse(value, target):
     """
     Mean squared error
     """
-    ((value - target)**2).mean()
+    loss = np.square((value - target)**2)
+    output = loss.mean()
+    return output
 
 
 def mse_der(value, target):
@@ -15,6 +17,20 @@ def mse_der(value, target):
     The derivative of the mean squared error
     """
     return (value - target) * (2 / value.shape[1])
+
+
+def cross_entropy(value, target):
+    """
+    Cross entropy loss function
+    """
+    return -(np.log2(value) * target).sum(axis=0)
+
+
+def cross_entropy_der(value, target):
+    """
+    Derivative of cross entropy loss function
+    """
+    return -(target / (value * np.log(2)))
 
 
 def relu(inp):

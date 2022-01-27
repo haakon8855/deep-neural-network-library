@@ -42,6 +42,12 @@ class Network():
         Create the layer-class instances and add them to the list of layers.
         """
         last_layer_output_size = self.config["input"]
+        if self.config["loss"] == "cross_entropy":
+            self.loss_func = funcs.cross_entropy
+            self.loss_func_der = funcs.cross_entropy_der
+        else:
+            self.loss_func = funcs.mse
+            self.loss_func_der = funcs.mse_der
         self.use_softmax = self.config["softmax"]
         for layer in self.config["layers"]:
             input_size = last_layer_output_size
@@ -78,7 +84,8 @@ class Network():
         # Compute initial jacobian from loss function to softmax-output
         tval = target_vals.reshape(target_vals.shape[0], -1)
         if self.use_softmax:
-            j_l_s = funcs.mse_der(prediction, tval)
+            # j_l_s = funcs.mse_der(prediction, tval)
+            j_l_s = funcs.cross_entropy_der(prediction, tval)
             # Compute j_s_z jacobian from softmax output to last layer output
             j_s_z = funcs.j_soft(prediction)
             j_l_z = np.einsum('ij,ijk->ik', j_l_s, j_s_z)
@@ -105,7 +112,11 @@ class Network():
             delta_b = delta_b.mean(axis=0)
             self.layers[i].update_weights(delta_w, delta_b)
 
-    def forward_pass(self, test_x: np.ndarray, minibatch=False):
+    def forward_pass(self,
+                     test_x: np.ndarray,
+                     target=None,
+                     minibatch=True,
+                     verbose=False):
         """
         Given an example test_x (single-case or minibatch),
         we want to predict its class probability. Since the layers call each
@@ -117,22 +128,32 @@ class Network():
         # the last layer is reached.
         if not minibatch:
             test_x = test_x.reshape(1, -1)
-        z_output = self.layers[0].forward_pass(test_x)
+        network_output = self.layers[0].forward_pass(test_x)
         if self.use_softmax:
-            return funcs.softmax(z_output)
-        return z_output
+            network_output = funcs.softmax(network_output)
+
+        # Print information (inputs, outputs, target and loss)
+        # if verbose flag is true.
+        if verbose:
+            print(f"\n\nNetwork Input: \n{test_x}")
+            print(f"\nNetwork Output: \n{network_output}")
+            if target is None:
+                print("\nTarget provided was None,",
+                      "please pass target to see loss.")
+            else:
+                print(f"\nTarget value(s): \n{target}")
+                print(f"\nLoss: {self.loss_func(network_output, target)}")
+
+        return network_output
 
 
 if __name__ == "__main__":
     NET = Network("config_file")
 
-    print("input: ", NET.train_x, "", end="")
-    print("result: \n", NET.forward_pass(NET.train_x, True))
+    # print("result: \n", NET.forward_pass(NET.train_x, verbose=True))
+    NET.forward_pass(NET.train_x, NET.train_y, verbose=True)
 
     for _ in range(10000):
         NET.backward_pass()
 
-    print()
-    for k in range(len(NET.train_x)):
-        print("input: ", NET.train_x[k], "", end="")
-        print("result: ", NET.forward_pass(NET.train_x[k]))
+    NET.forward_pass(NET.train_x, NET.train_y, verbose=True)
