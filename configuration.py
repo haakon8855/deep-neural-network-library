@@ -26,7 +26,7 @@ class Config():
             False,
             "layers": [
                 {
-                    "size": 100,
+                    "size": 2,
                     "act": "sigmoid",
                     "lrate": 0.75,
                     "wr": (-0.5, 0.5),  # weight range

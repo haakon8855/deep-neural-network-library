@@ -29,8 +29,8 @@ class Network():
         self.train_x = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0],
                                  [1.0, 1.0]])
         self.train_y = np.array([0.0, 1.0, 1.0, 0.0])
-        self.train_y = np.array([[1.0, 0.0], [0.0, 1.0], [0.0, 1.0],
-                                 [1.0, 0.0]])
+        self.train_y = np.array([[0.0, 1.0], [1.0, 0.0], [1.0, 0.0],
+                                 [0.0, 1.0]])
         self.test_x = self.train_x
         self.test_y = self.train_y
         self.use_softmax = False
