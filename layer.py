@@ -111,5 +111,6 @@ class Layer():
     def __str__(self):
         outstring = f"Input size: {self.input_dimensions}\n"
         outstring += f"Output size: {self.num_nodes}\n"
-        outstring += f"Activation function: {self.activation_func}"
+        outstring += f"Activation function: {self.activation_func}\n"
+        outstring += f"Learning rate: {self.lrate}\n"
         return outstring

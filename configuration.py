@@ -1,5 +1,7 @@
 """haakoas"""
 
+import configparser
+
 
 class Config():
     """
@@ -11,33 +13,9 @@ class Config():
         Fetches the config from the given configuration file path and returns
         a json-object/python-dictionary containing the values.
         """
-        return {
-            "loss":
-            "mse",  # (global) loss function
-            "lrate":
-            0.1,  # (global) learning rate
-            "wreg":
-            0.001,  # (global) weight regularization rate
-            "wrt":
-            "L2",  # (global) weight regularization type
-            "input":
-            100,  # size of input layer (number of input nodes)
-            "softmax":
-            True,
-            "layers": [
-                {
-                    "size": 50,
-                    "act": "sigmoid",
-                    "lrate": 0.1,
-                    "wr": (-0.5, 0.5),  # weight range
-                    "br": (-0.5, 0.5),  # bias range
-                },
-                {
-                    "size": 4,
-                    "act": "sigmoid",
-                    "lrate": 0.1,
-                    "wr": (-0.5, 0.5),  # weight range
-                    "br": (-0.5, 0.5),  # bias range
-                },
-            ],
-        }
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        # print(config.sections())
+        for layer_section in config.sections()[1:]:
+            print(config[layer_section]['size'])
+        return config

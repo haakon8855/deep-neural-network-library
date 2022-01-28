@@ -1,12 +1,12 @@
 """haakoas"""
 
 import numpy as np
+from matplotlib import pyplot as plt
 
 from layer import Layer
 from data_generator import DataGenerator
 from configuration import Config
 import functions as funcs
-from matplotlib import pyplot as plt
 
 
 class Network():
@@ -17,7 +17,7 @@ class Network():
         self.layers = []
 
         self.config = Config.get_config(config_file)
-        self.lrate = self.config["lrate"]
+        self.lrate = float(self.config['GLOBALS']["lrate"])
         self.use_softmax = False
 
         generator = DataGenerator(10, 5, 10, 5, 10, 0.008, seed=123)
@@ -45,24 +45,27 @@ class Network():
         """
         Create the layer-class instances and add them to the list of layers.
         """
-        last_layer_output_size = self.config["input"]
-        if self.config["loss"] == "cross_entropy":
+        prev_layer_output_size = int(self.config['GLOBALS']["input"])
+        if self.config['GLOBALS']["loss"] == "cross_entropy":
             self.loss_func = funcs.cross_entropy
             self.loss_func_der = funcs.cross_entropy_der
         else:
             self.loss_func = funcs.mse
             self.loss_func_der = funcs.mse_der
-        self.use_softmax = self.config["softmax"]
-        for layer in self.config["layers"]:
-            input_size = last_layer_output_size
-            output_size = layer["size"]
-            weight_range = layer["wr"]
-            bias_range = layer["br"]
-            lrate = layer["lrate"]
-            if layer["act"] == "sigmoid":
+        self.use_softmax = self.config['GLOBALS']["softmax"]
+        for layer_section in self.config.sections()[1:]:
+            layer = self.config[layer_section]
+            input_size = int(prev_layer_output_size)
+            output_size = int(layer["size"])
+            weight_range = (float(layer["wr_start"]), float(layer["wr_end"]))
+            bias_range = (float(layer["br_start"]), float(layer["br_end"]))
+            lrate = self.lrate
+            if "lrate" in layer:
+                lrate = float(layer["lrate"])
+            if layer["activation"] == "sigmoid":
                 activation_func = funcs.sigmoid
                 activation_func_der = funcs.sigmoid_der
-            elif layer["act"] == "relu":
+            elif layer["activation"] == "relu":
                 activation_func = funcs.relu
                 activation_func_der = funcs.relu_der
             self.layers.append(
@@ -73,7 +76,7 @@ class Network():
                       bias_range=bias_range,
                       activation_func=activation_func,
                       activation_func_der=activation_func_der))
-            last_layer_output_size = output_size
+            prev_layer_output_size = output_size
         for i in range(0, len(self.layers) - 1):
             self.layers[i].set_next_layer(self.layers[i + 1])
 
@@ -173,7 +176,7 @@ class Network():
 
 
 if __name__ == "__main__":
-    NET = Network("config_file")
+    NET = Network("config.ini")
 
     print(NET)
 
