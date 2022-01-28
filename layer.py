@@ -1,7 +1,7 @@
 """haakoas"""
 
 import numpy as np
-import functions as funcs
+from utilities import Utilities as utils
 
 
 class Layer():
@@ -15,8 +15,8 @@ class Layer():
                  lrate: float,
                  weight_range=(-0.5, 0.5),
                  bias_range=(-0.5, 0.5),
-                 activation_func=funcs.sigmoid,
-                 activation_func_der=funcs.sigmoid_der):
+                 activation_func=utils.sigmoid,
+                 activation_func_der=utils.sigmoid_der):
         self.input_dimensions = input_dimensions  # Add bias weights
         self.num_nodes = num_nodes  # Number of nodes
         self.lrate = lrate  # Layer-specific learning rate

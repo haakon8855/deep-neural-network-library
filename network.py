@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from layer import Layer
 from data_generator import DataGenerator
 from configuration import Config
-import functions as funcs
+from utilities import Utilities as utils
 
 
 class Network():
@@ -48,11 +48,11 @@ class Network():
         """
         prev_layer_output_size = int(self.config['GLOBALS']["input"])
         if self.config['GLOBALS']["loss"] == "cross_entropy":
-            self.loss_func = funcs.cross_entropy
-            self.loss_func_der = funcs.cross_entropy_der
+            self.loss_func = utils.cross_entropy
+            self.loss_func_der = utils.cross_entropy_der
         else:
-            self.loss_func = funcs.mse
-            self.loss_func_der = funcs.mse_der
+            self.loss_func = utils.mse
+            self.loss_func_der = utils.mse_der
         self.use_softmax = self.config['GLOBALS']["softmax"]
         for layer_section in self.config.sections()[1:]:
             layer = self.config[layer_section]
@@ -64,11 +64,11 @@ class Network():
             if "lrate" in layer:
                 lrate = float(layer["lrate"])
             if layer["activation"] == "sigmoid":
-                activation_func = funcs.sigmoid
-                activation_func_der = funcs.sigmoid_der
+                activation_func = utils.sigmoid
+                activation_func_der = utils.sigmoid_der
             elif layer["activation"] == "relu":
-                activation_func = funcs.relu
-                activation_func_der = funcs.relu_der
+                activation_func = utils.relu
+                activation_func_der = utils.relu_der
             self.layers.append(
                 Layer(input_dimensions=input_size,
                       num_nodes=output_size,
@@ -94,13 +94,13 @@ class Network():
         # Compute initial jacobian from loss function to softmax-output
         tval = target_vals.reshape(target_vals.shape[0], -1)
         if self.use_softmax:
-            # j_l_s = funcs.mse_der(prediction, tval)
-            j_l_s = funcs.cross_entropy_der(prediction, tval)
+            # j_l_s = utils.mse_der(prediction, tval)
+            j_l_s = utils.cross_entropy_der(prediction, tval)
             # Compute j_s_z jacobian from softmax output to last layer output
-            j_s_z = funcs.j_soft(prediction)
+            j_s_z = utils.j_soft(prediction)
             j_l_z = np.einsum('ij,ijk->ik', j_l_s, j_s_z)
         else:
-            j_l_z = funcs.mse_der(prediction, tval)
+            j_l_z = utils.mse_der(prediction, tval)
         deltas = []
 
         # For j from n-1 to 0 (incl.) where n is number of layers
@@ -140,7 +140,7 @@ class Network():
             test_x = test_x.reshape(1, -1)
         network_output = self.layers[0].forward_pass(test_x)
         if self.use_softmax:
-            network_output = funcs.softmax(network_output)
+            network_output = utils.softmax(network_output)
 
         # Calculate loss and store in loss log.
         current_loss = self.get_loss(network_output, target)
