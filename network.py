@@ -180,7 +180,6 @@ if __name__ == "__main__":
 
     print(NET)
 
-    # print("result: \n", NET.forward_pass(NET.train_x, verbose=True))
     NET.forward_pass(NET.train_x, NET.train_y, verbose=True)
 
     for _ in range(5000):

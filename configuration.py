@@ -15,7 +15,6 @@ class Config():
         """
         config = configparser.ConfigParser()
         config.read(config_file)
-        # print(config.sections())
         for layer_section in config.sections()[1:]:
             print(config[layer_section]['size'])
         return config
