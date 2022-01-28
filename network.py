@@ -1,6 +1,7 @@
 """haakoas"""
 
 import numpy as np
+from time import time
 from matplotlib import pyplot as plt
 
 from layer import Layer
@@ -20,7 +21,7 @@ class Network():
         self.lrate = float(self.config['GLOBALS']["lrate"])
         self.use_softmax = False
 
-        generator = DataGenerator(10, 5, 10, 5, 10, 0.008, seed=123)
+        generator = DataGenerator(10, 5, 10, 5, 10, 0.008)
         train, validation, test = generator.generate_images(10)
 
         self.train_x, self.train_y = train
@@ -182,10 +183,17 @@ if __name__ == "__main__":
 
     NET.forward_pass(NET.train_x, NET.train_y, verbose=True)
 
-    for _ in range(5000):
+    start_time = time()
+    for _ in range(1000):
         NET.backward_pass()
+    end_time = time()
 
     NET.forward_pass(NET.train_x, NET.train_y, verbose=True)
 
+    print(f"Time to train: {round(end_time-start_time, 3)}")
+
+    plt.xlabel("Minibatch")
+    plt.ylabel("Loss")
     plt.plot(NET.historic_loss)
+    plt.legend(["Train"])
     plt.show()
