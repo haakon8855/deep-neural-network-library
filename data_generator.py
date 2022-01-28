@@ -1,6 +1,6 @@
 """haakoas"""
 
-from random import randint
+import random
 from bresenham import bresenham
 import numpy as np
 from matplotlib import pyplot as plt
@@ -19,60 +19,69 @@ class DataGenerator():
                  noise,
                  split=(0.7, 0.2, 0.1),
                  centered=True,
-                 flattening=True):
+                 seed=None):
         if (n < 10 or n > 50):
             print(f"Parameter not within range: n={n}!")
+        if seed is not None:
+            random.seed(seed)
         self.size = n
         self.min_dim = (min_width, min_height)
         self.max_dim = (max_width, max_height)
         self.noise = noise
         self.split = split
         self.centered = centered
-        self.flattening = flattening
         self.images = None
+        self.images_flattened = None
         self.classes = None
 
-    def get_images(self):
+    def get_images(self, flattened=True):
         """
         Returns the generated images. Returns None if self.generate_images()
         has not been run yet.
         """
         if self.images is None:
             return None
-        after_train = len(self.images) * self.split[0]
-        after_validation = len(self.images) * (self.split[0] + self.split[1])
-        train_x = np.array(self.images[:int(after_train)])
-        train_y = self.classes[:int(after_train)]
-        validation_x = self.images[int(after_train):int(after_validation)]
-        validation_y = self.classes[int(after_train):int(after_validation)]
-        test_x = self.images[int(after_validation):]
-        test_y = self.classes[int(after_validation):]
+        if flattened:
+            source_list = self.images_flattened
+        else:
+            source_list = self.images
+        after_train = len(source_list) * self.split[0]
+        after_validation = len(source_list) * (self.split[0] + self.split[1])
+        train_x = np.array(source_list[:int(after_train)])
+        train_y = np.array(self.classes[:int(after_train)])
+        validation_x = np.array(
+            source_list[int(after_train):int(after_validation)])
+        validation_y = np.array(
+            self.classes[int(after_train):int(after_validation)])
+        test_x = np.array(source_list[int(after_validation):])
+        test_y = np.array(self.classes[int(after_validation):])
         return (train_x, train_y), (validation_x, validation_y), (test_x,
                                                                   test_y)
 
-    def generate_images(self, amount):
+    def generate_images(self, amount, flattened=True):
         """
         Generates a set of images according to the specified parameters.
         Then returns the images in the form of three data sets with
         corresponding truth values.
         """
         self.images = []
+        self.images_flattened = []
         self.classes = []
         for _ in range(amount):
             image, classes = self.generate_one_image()
-            if self.flattening:
-                self.images.append(image.flatten())
-            else:
-                self.images.append(image)
-            self.classes.append(classes)
-        return self.get_images()
+            self.images.append(image)
+            self.images_flattened.append(image.flatten())
+            classification = [0, 0, 0, 0]
+            classification[classes] = 1
+            self.classes.append(classification)
+        return self.get_images(flattened)
 
     def generate_one_image(self):
         """
         Generates one single image and returns it as a 2d numpy array. The class
         (and thus the figures present in the image) is determined randomly.
         """
-        image_class = randint(0, 3)
+        image_class = random.randint(0, 3)
         if image_class == 0:
             image = self.generate_circle()
         elif image_class == 1:
@@ -90,14 +99,14 @@ class DataGenerator():
         figure's size as the box's size is set randomly. Its position is also
         chosen randomly such that the entire box is within the image.
         """
-        width = randint(self.min_dim[0], self.max_dim[0])
-        height = randint(self.min_dim[1], self.max_dim[1])
+        width = random.randint(self.min_dim[0], self.max_dim[0])
+        height = random.randint(self.min_dim[1], self.max_dim[1])
         if self.centered:
             box_x = (self.size - width) // 2
             box_y = (self.size - height) // 2
         else:
-            box_x = randint(0, self.size - width)
-            box_y = randint(0, self.size - height)
+            box_x = random.randint(0, self.size - width)
+            box_y = random.randint(0, self.size - height)
         return box_x, box_y, width, height
 
     def generate_circle(self):
@@ -178,8 +187,8 @@ class DataGenerator():
         """
         noise_pixels = int(self.noise * (self.size**2))
         for _ in range(noise_pixels):
-            rand_x = randint(0, self.size - 1)
-            rand_y = randint(0, self.size - 1)
+            rand_x = random.randint(0, self.size - 1)
+            rand_y = random.randint(0, self.size - 1)
             image[rand_y][rand_x] = 1 - image[rand_y][rand_x]
         return image
 
@@ -188,9 +197,11 @@ if __name__ == "__main__":
     # GEN = DataGenerator(11, 5, 10, 5, 10)
     # GEN = DataGenerator(50, 10, 50, 10, 50, False)
     # GEN = DataGenerator(50, 20, 30, 20, 30, 0.008)
-    GEN = DataGenerator(11, 5, 10, 5, 10, 0.008, flattening=True)
-    (TRAIN_X, TRAIN_Y), (VAL_X, VAL_Y), (TEST_X,
-                                         TEST_Y) = GEN.generate_images(10)
+    GEN = DataGenerator(10, 5, 10, 5, 10, 0.008, seed=123)
+    (TRAIN_X,
+     TRAIN_Y), (VAL_X, VAL_Y), (TEST_X,
+                                TEST_Y) = GEN.generate_images(10,
+                                                              flattened=False)
     for I, IMAGE in enumerate(TRAIN_X):
         print(TRAIN_Y[I])
         plt.imshow(IMAGE)

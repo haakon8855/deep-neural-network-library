@@ -17,7 +17,7 @@ class Layer():
                  bias_range=(-0.5, 0.5),
                  activation_func=funcs.sigmoid,
                  activation_func_der=funcs.sigmoid_der):
-        self.input_dimension = input_dimensions  # Add bias weights
+        self.input_dimensions = input_dimensions  # Add bias weights
         self.num_nodes = num_nodes  # Number of nodes
         self.lrate = lrate  # Layer-specific learning rate
 
@@ -29,7 +29,7 @@ class Layer():
         # initialize weights randomly
         self.weights = np.random.uniform(
             self.weight_range[0], self.weight_range[1],
-            (self.input_dimension, self.num_nodes)).astype(np.float32)
+            (self.input_dimensions, self.num_nodes)).astype(np.float32)
         self.biases = np.random.uniform(self.bias_range[0], self.bias_range[1],
                                         (self.num_nodes, 1)).astype(np.float32)
 
@@ -107,3 +107,9 @@ class Layer():
         """
         self.weights = self.weights - self.lrate * delta_w
         self.biases = (self.biases - self.lrate * delta_b.reshape(-1, 1))
+
+    def __str__(self):
+        outstring = f"Input size: {self.input_dimensions}\n"
+        outstring += f"Output size: {self.num_nodes}\n"
+        outstring += f"Activation function: {self.activation_func}"
+        return outstring

@@ -21,19 +21,26 @@ class Config():
             "wrt":
             "L2",  # (global) weight regularization type
             "input":
-            2,  # size of input layer (number of input nodes)
+            100,  # size of input layer (number of input nodes)
             "softmax":
             False,
             "layers": [
                 {
-                    "size": 2,
+                    "size": 50,
                     "act": "sigmoid",
                     "lrate": 0.75,
                     "wr": (-0.5, 0.5),  # weight range
                     "br": (-0.5, 0.5),  # bias range
                 },
                 {
-                    "size": 2,
+                    "size": 100,
+                    "act": "sigmoid",
+                    "lrate": 0.75,
+                    "wr": (-0.5, 0.5),  # weight range
+                    "br": (-0.5, 0.5),  # bias range
+                },
+                {
+                    "size": 4,
                     "act": "sigmoid",
                     "lrate": 0.75,
                     "wr": (-0.5, 0.5),  # weight range

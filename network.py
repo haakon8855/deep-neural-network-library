@@ -17,8 +17,9 @@ class Network():
 
         self.config = Config.get_config(config_file)
         self.lrate = self.config["lrate"]
+        self.use_softmax = False
 
-        generator = DataGenerator(10, 5, 10, 5, 10, 0.008)
+        generator = DataGenerator(10, 5, 10, 5, 10, 0.008, seed=123)
         train, validation, test = generator.generate_images(10)
 
         self.train_x, self.train_y = train
@@ -26,14 +27,13 @@ class Network():
         self.test_x, self.test_y = test
 
         # XOR example
-        self.train_x = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0],
-                                 [1.0, 1.0]])
-        self.train_y = np.array([0.0, 1.0, 1.0, 0.0])
-        self.train_y = np.array([[0.0, 1.0], [1.0, 0.0], [1.0, 0.0],
-                                 [0.0, 1.0]])
+        # self.train_x = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0],
+        #                          [1.0, 1.0]])
+        # self.train_y = np.array([0.0, 1.0, 1.0, 0.0])
+        # self.train_y = np.array([[0.0, 1.0], [1.0, 0.0], [1.0, 0.0],
+        #                          [0.0, 1.0]])
         self.test_x = self.train_x
         self.test_y = self.train_y
-        self.use_softmax = False
 
         self.populate_layers()  # Create layer-objects
 
@@ -146,9 +146,20 @@ class Network():
 
         return network_output
 
+    def __str__(self):
+        outstring = "Network:\n"
+        outstring += f"Input size: {self.layers[0].input_dimensions}\n"
+        outstring += f"Output size: {self.layers[-1].num_nodes}\n"
+        outstring += "\nLayers:\n"
+        for i, layer in enumerate(self.layers):
+            outstring += f"Layer {i}\n: {str(layer)}\n"
+        return outstring
+
 
 if __name__ == "__main__":
     NET = Network("config_file")
+
+    print(NET)
 
     # print("result: \n", NET.forward_pass(NET.train_x, verbose=True))
     NET.forward_pass(NET.train_x, NET.train_y, verbose=True)
