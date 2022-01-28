@@ -78,13 +78,13 @@ def j_soft(inp):
     """
     The derivative of the softmax function in the form of a matrix.
     """
-    j_soft = np.zeros((inp.shape[0], inp.shape[1], inp.shape[1]))
-    for i in range(j_soft.shape[0]):
-        for j in range(j_soft.shape[1]):
-            for k in range(j_soft.shape[2]):
+    j_s_z = np.zeros((inp.shape[0], inp.shape[1], inp.shape[1]))
+    for i in range(j_s_z.shape[0]):
+        for j in range(j_s_z.shape[1]):
+            for k in range(j_s_z.shape[2]):
                 if j == k:
                     num = inp[i, j] - inp[i, j]**2
                 else:
                     num = -inp[i, j] * inp[i, k]
-                j_soft[i, j, k] = num
-    return j_soft
+                j_s_z[i, j, k] = num
+    return j_s_z

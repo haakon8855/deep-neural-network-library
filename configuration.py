@@ -23,7 +23,7 @@ class Config():
             "input":
             100,  # size of input layer (number of input nodes)
             "softmax":
-            False,
+            True,
             "layers": [
                 {
                     "size": 50,
