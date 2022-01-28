@@ -7,9 +7,8 @@ def mse(value, target):
     """
     Mean squared error
     """
-    loss = np.square((value - target)**2)
-    output = loss.mean()
-    return output
+    loss = np.square(value - target)
+    return loss.mean()
 
 
 def mse_der(value, target):
@@ -23,7 +22,8 @@ def cross_entropy(value, target):
     """
     Cross entropy loss function
     """
-    return -(np.log2(value) * target).sum(axis=0)
+    loss = -(np.log2(value) * target)
+    return loss.sum(axis=0).mean()
 
 
 def cross_entropy_der(value, target):

@@ -21,7 +21,7 @@ class Network():
         self.lrate = float(self.config['GLOBALS']["lrate"])
         self.use_softmax = False
 
-        generator = DataGenerator(10, 5, 10, 5, 10, 0.008)
+        generator = DataGenerator(10, 5, 10, 5, 10, 0.008, seed=123)
         train, validation, test = generator.generate_images(10)
 
         self.train_x, self.train_y = train
