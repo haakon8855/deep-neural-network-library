@@ -6,6 +6,7 @@ from layer import Layer
 from data_generator import DataGenerator
 from configuration import Config
 import functions as funcs
+from matplotlib import pyplot as plt
 
 
 class Network():
@@ -34,6 +35,9 @@ class Network():
         #                          [0.0, 1.0]])
         self.test_x = self.train_x
         self.test_y = self.train_y
+
+        # Store the historic loss values to track network training progress
+        self.historic_loss = []
 
         self.populate_layers()  # Create layer-objects
 
@@ -80,7 +84,9 @@ class Network():
         # For each example in training set
         target_vals = self.train_y  # Extract example target values
         # Run forward pass and cache in-between computations
-        prediction = self.forward_pass(self.train_x, True)
+        prediction = self.forward_pass(self.train_x,
+                                       target=target_vals,
+                                       minibatch=True)
         # Compute initial jacobian from loss function to softmax-output
         tval = target_vals.reshape(target_vals.shape[0], -1)
         if self.use_softmax:
@@ -132,6 +138,10 @@ class Network():
         if self.use_softmax:
             network_output = funcs.softmax(network_output)
 
+        # Calculate loss and store in loss log.
+        current_loss = self.get_loss(network_output, target)
+        self.historic_loss.append(current_loss)
+
         # Print information (inputs, outputs, target and loss)
         # if verbose flag is true.
         if verbose:
@@ -142,9 +152,15 @@ class Network():
                       "please pass target to see loss.")
             else:
                 print(f"\nTarget value(s): \n{target}")
-                print(f"\nLoss: {self.loss_func(network_output, target)}")
+                print(f"\nLoss: {current_loss}")
 
         return network_output
+
+    def get_loss(self, network_output, target):
+        """
+        Returns the network's loss given its prediction and target value.
+        """
+        return self.loss_func(network_output, target)
 
     def __str__(self):
         outstring = "Network:\n"
@@ -164,7 +180,10 @@ if __name__ == "__main__":
     # print("result: \n", NET.forward_pass(NET.train_x, verbose=True))
     NET.forward_pass(NET.train_x, NET.train_y, verbose=True)
 
-    for _ in range(10000):
+    for _ in range(5000):
         NET.backward_pass()
 
     NET.forward_pass(NET.train_x, NET.train_y, verbose=True)
+
+    plt.plot(NET.historic_loss)
+    plt.show()
