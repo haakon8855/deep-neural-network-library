@@ -21,8 +21,8 @@ class Network():
         self.lrate = float(self.config['GLOBALS']["lrate"])
         self.use_softmax = False
 
-        generator = DataGenerator(10, 5, 10, 5, 10, 0.008, seed=123)
-        train, validation, test = generator.generate_images(10)
+        generator = DataGenerator(10, 5, 10, 5, 10, 0.008)
+        train, validation, test = generator.generate_images(800)
 
         self.train_x, self.train_y = train
         self.validation_x, self.validation_y = validation
@@ -31,9 +31,9 @@ class Network():
         # XOR example
         # self.train_x = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0],
         #                          [1.0, 1.0]])
-        # self.train_y = np.array([0.0, 1.0, 1.0, 0.0])
         # self.train_y = np.array([[0.0, 1.0], [1.0, 0.0], [1.0, 0.0],
         #                          [0.0, 1.0]])
+        # self.train_y = np.array([0.0, 1.0, 1.0, 0.0])
         self.test_x = self.train_x
         self.test_y = self.train_y
 
@@ -53,7 +53,7 @@ class Network():
         else:
             self.loss_func = utils.mse
             self.loss_func_der = utils.mse_der
-        self.use_softmax = self.config['GLOBALS']["softmax"]
+        self.use_softmax = self.config['GLOBALS']["softmax"] == "true"
         for layer_section in self.config.sections()[1:]:
             layer = self.config[layer_section]
             input_size = int(prev_layer_output_size)
@@ -81,14 +81,27 @@ class Network():
         for i in range(0, len(self.layers) - 1):
             self.layers[i].set_next_layer(self.layers[i + 1])
 
-    def backward_pass(self) -> None:
+    def fit(self, batch_size=5) -> None:
+        """
+        Runs backward_pass on minibatches to run through all training examples.
+        """
+        for i in range(0, len(self.train_x), batch_size):
+            if i >= len(self.train_x) - batch_size:
+                minibatch_x = self.train_x[i:]
+                minibatch_y = self.train_y[i:]
+            else:
+                minibatch_x = self.train_x[i:i + batch_size]
+                minibatch_y = self.train_y[i:i + batch_size]
+            self.backward_pass(minibatch_x, minibatch_y)
+
+    def backward_pass(self, train_x, train_y) -> None:
         """
         Runs backprop on the network to modify its weights and thus training it.
         """
         # For each example in training set
-        target_vals = self.train_y  # Extract example target values
+        target_vals = train_y  # Extract example target values
         # Run forward pass and cache in-between computations
-        prediction = self.forward_pass(self.train_x,
+        prediction = self.forward_pass(train_x,
                                        target=target_vals,
                                        minibatch=True)
         # Compute initial jacobian from loss function to softmax-output
@@ -184,8 +197,8 @@ if __name__ == "__main__":
     NET.forward_pass(NET.train_x, NET.train_y, verbose=True)
 
     start_time = time()
-    for _ in range(1000):
-        NET.backward_pass()
+    for _ in range(50):
+        NET.fit(batch_size=20)
     end_time = time()
 
     NET.forward_pass(NET.train_x, NET.train_y, verbose=True)

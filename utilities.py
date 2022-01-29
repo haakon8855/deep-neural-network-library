@@ -9,6 +9,7 @@ class Utilities():
         """
         Mean squared error
         """
+        target = target.reshape(target.shape[0], -1)
         loss = np.square(value - target)
         return loss.mean()
 
