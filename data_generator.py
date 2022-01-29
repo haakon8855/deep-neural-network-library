@@ -194,10 +194,7 @@ class DataGenerator():
 
 
 if __name__ == "__main__":
-    # GEN = DataGenerator(11, 5, 10, 5, 10)
-    # GEN = DataGenerator(50, 10, 50, 10, 50, False)
-    # GEN = DataGenerator(50, 20, 30, 20, 30, 0.008)
-    GEN = DataGenerator(10, 5, 10, 5, 10, 0.008, seed=123)
+    GEN = DataGenerator(20, 5, 20, 5, 20, 0.01)
     (TRAIN_X,
      TRAIN_Y), (VAL_X, VAL_Y), (TEST_X,
                                 TEST_Y) = GEN.generate_images(10,

@@ -21,8 +21,8 @@ class Network():
         self.lrate = float(self.config['GLOBALS']["lrate"])
         self.use_softmax = False
 
-        generator = DataGenerator(10, 5, 10, 5, 10, 0.008)
-        train, validation, test = generator.generate_images(800)
+        generator = DataGenerator(10, 10, 10, 10, 10, 0.00)
+        train, validation, test = generator.generate_images(300)
 
         self.train_x, self.train_y = train
         self.validation_x, self.validation_y = validation
@@ -38,7 +38,11 @@ class Network():
         self.test_y = self.train_y
 
         # Store the historic loss values to track network training progress
-        self.historic_loss = []
+        self.loss_index = -1
+        self.train_loss = []
+        self.train_loss_index = []
+        self.validation_loss = []
+        self.validation_loss_index = []
 
         self.populate_layers()  # Create layer-objects
 
@@ -81,18 +85,26 @@ class Network():
         for i in range(0, len(self.layers) - 1):
             self.layers[i].set_next_layer(self.layers[i + 1])
 
-    def fit(self, batch_size=5) -> None:
+    def fit(self, epochs=1, batch_size=5) -> float:
         """
         Runs backward_pass on minibatches to run through all training examples.
+        Returns time to train.
         """
-        for i in range(0, len(self.train_x), batch_size):
-            if i >= len(self.train_x) - batch_size:
-                minibatch_x = self.train_x[i:]
-                minibatch_y = self.train_y[i:]
-            else:
-                minibatch_x = self.train_x[i:i + batch_size]
-                minibatch_y = self.train_y[i:i + batch_size]
-            self.backward_pass(minibatch_x, minibatch_y)
+        start_time = time()
+        for _ in range(epochs):
+            for i in range(0, len(self.train_x), batch_size):
+                if i >= len(self.train_x) - batch_size:
+                    minibatch_x = self.train_x[i:]
+                    minibatch_y = self.train_y[i:]
+                else:
+                    minibatch_x = self.train_x[i:i + batch_size]
+                    minibatch_y = self.train_y[i:i + batch_size]
+                self.backward_pass(minibatch_x, minibatch_y)
+            self.forward_pass(self.validation_x,
+                              target=self.validation_y,
+                              validation=True)
+        end_time = time()
+        return end_time - start_time
 
     def backward_pass(self, train_x, train_y) -> None:
         """
@@ -139,7 +151,8 @@ class Network():
                      test_x: np.ndarray,
                      target=None,
                      minibatch=True,
-                     verbose=False):
+                     verbose=False,
+                     validation=False):
         """
         Given an example test_x (single-case or minibatch),
         we want to predict its class probability. Since the layers call each
@@ -157,7 +170,13 @@ class Network():
 
         # Calculate loss and store in loss log.
         current_loss = self.get_loss(network_output, target)
-        self.historic_loss.append(current_loss)
+        if validation:
+            self.validation_loss.append(current_loss)
+            self.validation_loss_index.append(self.loss_index)
+        else:
+            self.loss_index += 1
+            self.train_loss.append(current_loss)
+            self.train_loss_index.append(self.loss_index)
 
         # Print information (inputs, outputs, target and loss)
         # if verbose flag is true.
@@ -194,19 +213,25 @@ if __name__ == "__main__":
 
     print(NET)
 
-    NET.forward_pass(NET.train_x, NET.train_y, verbose=True)
+    # NET.forward_pass(NET.train_x, NET.train_y, verbose=True)
+    NET.forward_pass(NET.validation_x,
+                     NET.validation_y,
+                     verbose=True,
+                     validation=True)
+    train_time = NET.fit(epochs=50, batch_size=20)
+    NET.forward_pass(NET.validation_x,
+                     NET.validation_y,
+                     verbose=True,
+                     validation=True)
+    # NET.forward_pass(NET.train_x, NET.train_y, verbose=True)
 
-    start_time = time()
-    for _ in range(50):
-        NET.fit(batch_size=20)
-    end_time = time()
-
-    NET.forward_pass(NET.train_x, NET.train_y, verbose=True)
-
-    print(f"Time to train: {round(end_time-start_time, 3)}")
+    print(f"Time to train: {round(train_time, 3)}")
+    print(f"trainloss len: {len(NET.train_loss)}")
+    print(f"validloss len: {len(NET.validation_loss)}")
 
     plt.xlabel("Minibatch")
     plt.ylabel("Loss")
-    plt.plot(NET.historic_loss)
+    plt.plot(NET.train_loss_index, NET.train_loss)
+    plt.plot(NET.validation_loss_index, NET.validation_loss)
     plt.legend(["Train"])
     plt.show()

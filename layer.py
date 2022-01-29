@@ -87,6 +87,7 @@ class Layer():
         self.input_vals = raw_result
         self.output_vals = self.activation_func(raw_result).astype(np.float32)
 
+        # TODO: Move this to backprop method
         # Compute Jacobian matrices before we return value
         derivative = self.activation_func_der(raw_result)
         self.j_z_sum = np.eye(derivative.shape[1]) * derivative[:,
@@ -106,7 +107,7 @@ class Layer():
         according to the layer's learning rate.
         """
         self.weights = self.weights - self.lrate * delta_w
-        self.biases = (self.biases - self.lrate * delta_b.reshape(-1, 1))
+        self.biases = self.biases - self.lrate * delta_b.reshape(-1, 1)
 
     def __str__(self):
         outstring = f"Input size: {self.input_dimensions}\n"
