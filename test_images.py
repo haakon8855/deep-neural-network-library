@@ -16,16 +16,25 @@ class TestImages():
         self.epochs = int(self.config['GLOBALS']['epochs'])
         self.batch_size = int(self.config['GLOBALS']['batch_size'])
         self.verbose = self.config['GLOBALS']['verbose'] == 'true'
-        self.centered = self.config['GLOBALS']['centered'] == 'true'
 
-        generator = DataGenerator(20,
-                                  10,
-                                  20,
-                                  10,
-                                  20,
-                                  0.01,
+        self.image_size = int(self.config['GLOBALS']['image_size'])
+        self.min_width = int(self.config['GLOBALS']['min_width'])
+        self.max_width = int(self.config['GLOBALS']['max_width'])
+        self.min_height = int(self.config['GLOBALS']['min_height'])
+        self.max_height = int(self.config['GLOBALS']['max_height'])
+        self.noise = float(self.config['GLOBALS']['noise'])
+        self.centered = self.config['GLOBALS']['centered'] == 'true'
+        self.data_set_size = int(self.config['GLOBALS']['data_set_size'])
+
+        generator = DataGenerator(self.image_size,
+                                  self.min_width,
+                                  self.max_width,
+                                  self.min_height,
+                                  self.max_height,
+                                  self.noise,
                                   centered=self.centered)
-        self.train, self.validation, self.test = generator.generate_images(800)
+        self.train, self.validation, self.test = generator.generate_images(
+            self.data_set_size)
 
         self.network = Network(self.config, self.train, self.validation,
                                self.test)
