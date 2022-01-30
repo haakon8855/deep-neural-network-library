@@ -19,6 +19,8 @@ class TestImages():
 
         self.network = Network(self.config, self.train, self.validation,
                                self.test)
+        if self.config['GLOBALS']['show_images'] == 'true':
+            generator.visualize_all()
 
     def main(self):
         """

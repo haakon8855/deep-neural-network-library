@@ -192,6 +192,29 @@ class DataGenerator():
             image[rand_y][rand_x] = 1 - image[rand_y][rand_x]
         return image
 
+    def visualize_all(self):
+        """
+        Visualizes the images in each data set by plotting them using
+        matplotlib.
+        """
+        train, validation, test = self.get_images(flattened=False)
+        self.visualize_one_data_set(train[0], 'Training set')
+        self.visualize_one_data_set(validation[0], 'Validation set')
+        self.visualize_one_data_set(test[0], 'Test set')
+
+    def visualize_one_data_set(self, data_set, title: str):
+        """
+        Visualizes the images in one specified data set using matplotlib.
+        """
+        fig, axs = plt.subplots(2, 5)
+        fig.canvas.set_window_title(title)
+        fig.suptitle(title)
+        for i, axis in enumerate(axs.flat):
+            axis.imshow(data_set[i])
+            axis.get_xaxis().set_visible(False)
+            axis.get_yaxis().set_visible(False)
+        plt.show()
+
 
 if __name__ == "__main__":
     GEN = DataGenerator(20, 5, 20, 5, 20, 0.01)
