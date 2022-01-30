@@ -11,12 +11,20 @@ class Network():
     """
     Network class containing all layers, and conducting training of the network.
     """
-    def __init__(self, config, train, validation, test) -> None:
+    def __init__(self,
+                 config,
+                 train,
+                 validation,
+                 test,
+                 wrt=None,
+                 wreg=0.001) -> None:
         self.layers = []
 
         self.config = config
         self.lrate = float(self.config['GLOBALS']["lrate"])
         self.use_softmax = False
+        self.wrt = wrt
+        self.wreg = wreg
 
         self.train_x, self.train_y = train
         self.validation_x, self.validation_y = validation
@@ -114,11 +122,13 @@ class Network():
         deltas = []
 
         # For j from n-1 to 0 (incl.) where n is number of layers
-        for i in range(len(self.layers) - 1, -1, -1):
-            layer = self.layers[i]
+        for j in range(len(self.layers) - 1, -1, -1):
+            layer = self.layers[j]
             # Perform the backward pass for layer j and get the jacobian
             # matrices and delta values for updating layer j's weights.
             delta_j, delta_jb, j_l_z = layer.backward_pass(j_l_z)
+            # Apply L2 regularization
+            delta_j = self.add_regularization(delta_j, layer.weights)
             # Cache deltas in order to update them later
             deltas.append((delta_j, delta_jb))
 
@@ -131,6 +141,17 @@ class Network():
             delta_w = delta_w.mean(axis=0)
             delta_b = delta_b.mean(axis=0)
             self.layers[i].update_weights(delta_w, delta_b)
+
+    def add_regularization(self, delta_j, weights):
+        """
+        Add the weight regularization to the gradients depending on which
+        regularization scheme is defined in the config.
+        """
+        if self.wrt == 'l1':
+            delta_j = delta_j + self.wreg * np.sign(weights)
+        elif self.wrt == 'l2':
+            delta_j = delta_j + self.wreg * weights
+        return delta_j
 
     def forward_pass(self,
                      test_x: np.ndarray,

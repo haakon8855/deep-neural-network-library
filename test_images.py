@@ -16,6 +16,8 @@ class TestImages():
         self.epochs = int(self.config['GLOBALS']['epochs'])
         self.batch_size = int(self.config['GLOBALS']['batch_size'])
         self.verbose = self.config['GLOBALS']['verbose'] == 'true'
+        self.wrt = self.config['GLOBALS']['wrt']
+        self.wreg = float(self.config['GLOBALS']['wreg'])
 
         self.image_size = int(self.config['GLOBALS']['image_size'])
         self.min_width = int(self.config['GLOBALS']['min_width'])
@@ -36,8 +38,12 @@ class TestImages():
         self.train, self.validation, self.test = generator.generate_images(
             self.data_set_size)
 
-        self.network = Network(self.config, self.train, self.validation,
-                               self.test)
+        self.network = Network(self.config,
+                               self.train,
+                               self.validation,
+                               self.test,
+                               wrt=self.wrt,
+                               wreg=self.wreg)
         if self.config['GLOBALS']['show_images'] == 'true':
             generator.visualize_all()
 
