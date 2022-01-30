@@ -89,5 +89,7 @@ class TestImages():
 
 
 if __name__ == "__main__":
-    test_images = TestImages("config1.ini")
+    # test_images = TestImages("config1.ini")
+    # test_images = TestImages("config2.ini")
+    test_images = TestImages("config3.ini")
     test_images.main()
