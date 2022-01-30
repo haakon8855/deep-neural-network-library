@@ -1,12 +1,9 @@
 """haakoas"""
 
-import numpy as np
 from time import time
-from matplotlib import pyplot as plt
+import numpy as np
 
 from layer import Layer
-from data_generator import DataGenerator
-from configuration import Config
 from utilities import Utilities as utils
 
 
@@ -14,28 +11,16 @@ class Network():
     """
     Network class containing all layers, and conducting training of the network.
     """
-    def __init__(self, config_file: str) -> None:
+    def __init__(self, config, train, validation, test) -> None:
         self.layers = []
 
-        self.config = Config.get_config(config_file)
+        self.config = config
         self.lrate = float(self.config['GLOBALS']["lrate"])
         self.use_softmax = False
-
-        generator = DataGenerator(10, 10, 10, 10, 10, 0.00)
-        train, validation, test = generator.generate_images(300)
 
         self.train_x, self.train_y = train
         self.validation_x, self.validation_y = validation
         self.test_x, self.test_y = test
-
-        # XOR example
-        # self.train_x = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0],
-        #                          [1.0, 1.0]])
-        # self.train_y = np.array([[0.0, 1.0], [1.0, 0.0], [1.0, 0.0],
-        #                          [0.0, 1.0]])
-        # self.train_y = np.array([0.0, 1.0, 1.0, 0.0])
-        self.test_x = self.train_x
-        self.test_y = self.train_y
 
         # Store the historic loss values to track network training progress
         self.loss_index = -1
@@ -209,29 +194,4 @@ class Network():
 
 
 if __name__ == "__main__":
-    NET = Network("config.ini")
-
-    print(NET)
-
-    # NET.forward_pass(NET.train_x, NET.train_y, verbose=True)
-    NET.forward_pass(NET.validation_x,
-                     NET.validation_y,
-                     verbose=True,
-                     validation=True)
-    train_time = NET.fit(epochs=50, batch_size=20)
-    NET.forward_pass(NET.validation_x,
-                     NET.validation_y,
-                     verbose=True,
-                     validation=True)
-    # NET.forward_pass(NET.train_x, NET.train_y, verbose=True)
-
-    print(f"Time to train: {round(train_time, 3)}")
-    print(f"trainloss len: {len(NET.train_loss)}")
-    print(f"validloss len: {len(NET.validation_loss)}")
-
-    plt.xlabel("Minibatch")
-    plt.ylabel("Loss")
-    plt.plot(NET.train_loss_index, NET.train_loss)
-    plt.plot(NET.validation_loss_index, NET.validation_loss)
-    plt.legend(["Train"])
-    plt.show()
+    pass
