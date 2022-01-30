@@ -87,7 +87,7 @@ class Network():
                 self.backward_pass(minibatch_x, minibatch_y)
             self.forward_pass(self.validation_x,
                               target=self.validation_y,
-                              validation=True)
+                              data_set=1)
         end_time = time()
         return end_time - start_time
 
@@ -137,7 +137,7 @@ class Network():
                      target=None,
                      minibatch=True,
                      verbose=False,
-                     validation=False):
+                     data_set=0):
         """
         Given an example test_x (single-case or minibatch),
         we want to predict its class probability. Since the layers call each
@@ -155,13 +155,16 @@ class Network():
 
         # Calculate loss and store in loss log.
         current_loss = self.get_loss(network_output, target)
-        if validation:
-            self.validation_loss.append(current_loss)
-            self.validation_loss_index.append(self.loss_index)
-        else:
+        if data_set == 0:
             self.loss_index += 1
             self.train_loss.append(current_loss)
             self.train_loss_index.append(self.loss_index)
+        elif data_set == 1:
+            self.validation_loss.append(current_loss)
+            self.validation_loss_index.append(self.loss_index)
+        else:
+            print(f"Test data loss: {current_loss}")
+            return network_output
 
         # Print information (inputs, outputs, target and loss)
         # if verbose flag is true.
@@ -191,7 +194,3 @@ class Network():
         for i, layer in enumerate(self.layers):
             outstring += f"Layer {i}\n: {str(layer)}\n"
         return outstring
-
-
-if __name__ == "__main__":
-    pass

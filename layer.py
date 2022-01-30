@@ -37,13 +37,17 @@ class Layer():
         self.activation_func = activation_func
         self.activation_func_der = activation_func_der
 
-        # input_vals is a vector containing the output of each node before
+        # input_values is a vector containing the output from the last layer
+        # before multiplying the inputs with the current layer's weights
+        # and adding biases.
+        self.input_values = None
+        # z_sum is a vector containing the output of each node before
         # sending the results through the activation function.
-        self.input_vals = np.zeros(num_nodes + 1, dtype=np.float32).T
-        # output_vals is a vector containing the output of each node after
-        # sending the results through the activation function.
-        # (i.e. output_vals = activation_func(input_vals))
-        self.output_vals = np.zeros(num_nodes + 1, dtype=np.float32).T
+        self.z_sum = None
+        # activations is a vector containing the output of each node after
+        # sending the z_sum through the activation function.
+        # (i.e. activations = activation_func(self.z_sum))
+        self.activations = None
         # next_layer contains a reference to the next layer in the network,
         # it is None if the current layer is the last layer.
         self.next_layer = None
@@ -67,9 +71,17 @@ class Layer():
             J_l_wb (delta for bias weights),
             J_l_y (J_l_z for upstream layer)
         """
-        j_l_w = j_l_z[:, np.newaxis, :] * self.j_z_w
-        j_l_wb = j_l_z[:, np.newaxis, :] * self.j_z_wb
-        j_l_y = np.einsum('ij,ijk->ik', j_l_z, self.j_z_y)
+        # Compute Jacobian matrices
+        derivative = self.activation_func_der(self.z_sum)
+        j_z_sum = np.eye(derivative.shape[1]) * derivative[:, np.newaxis, :]
+        j_z_y = j_z_sum @ self.weights.T
+
+        j_z_w = np.einsum('ij,ik->ijk', self.input_values, derivative)
+        j_z_wb = np.einsum('j,ik->ijk', [1], derivative)
+
+        j_l_w = j_l_z[:, np.newaxis, :] * j_z_w
+        j_l_wb = j_l_z[:, np.newaxis, :] * j_z_wb
+        j_l_y = np.einsum('ij,ijk->ik', j_l_z, j_z_y)
         return j_l_w, j_l_wb, j_l_y
 
     def forward_pass(self, input_values):
@@ -77,29 +89,19 @@ class Layer():
         Computes the output of the layer's nodes given their inputs and
         the activation function.
         """
-        # The input values are copied to avoid editing the list reference, then
-        # an activation of 1 is appended to represent the activation of the
-        # bias node.
-        raw_result = np.einsum("ij,kj->ki", self.weights.T,
-                               input_values) + self.biases.reshape(1, -1)
+        # Caching input_values, z_sum and activations allows for time saving
+        # when performing the backward pass later.
+        self.input_values = input_values
+        self.z_sum = np.einsum("ij,kj->ki", self.weights.T,
+                               self.input_values) + self.biases.reshape(1, -1)
 
         # We store the temporary values
-        self.input_vals = raw_result
-        self.output_vals = self.activation_func(raw_result).astype(np.float32)
-
-        # TODO: Move this to backprop method
-        # Compute Jacobian matrices before we return value
-        derivative = self.activation_func_der(raw_result)
-        self.j_z_sum = np.eye(derivative.shape[1]) * derivative[:,
-                                                                np.newaxis, :]
-        self.j_z_y = self.j_z_sum @ self.weights.T
-        self.j_z_w = np.einsum('ij,ik->ijk', input_values, derivative)
-        self.j_z_wb = np.einsum('j,ik->ijk', [1], derivative)
+        self.activations = self.activation_func(self.z_sum).astype(np.float32)
 
         # And return the output
         if self.next_layer is not None:
-            return self.next_layer.forward_pass(self.output_vals)
-        return self.output_vals
+            return self.next_layer.forward_pass(self.activations)
+        return self.activations
 
     def update_weights(self, delta_w, delta_b):
         """
