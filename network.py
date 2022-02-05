@@ -66,6 +66,12 @@ class Network():
             elif layer["activation"] == "relu":
                 activation_func = utils.relu
                 activation_func_der = utils.relu_der
+            elif layer["activation"] == "tanh":
+                activation_func = utils.tanh
+                activation_func_der = utils.tanh_der
+            elif layer["activation"] == "linear":
+                activation_func = utils.linear
+                activation_func_der = utils.linear_der
             self.layers.append(
                 Layer(input_dimensions=input_size,
                       num_nodes=output_size,

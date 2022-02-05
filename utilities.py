@@ -64,6 +64,34 @@ class Utilities():
         return Utilities.sigmoid(inp) * (1.0 - Utilities.sigmoid(inp))
 
     @staticmethod
+    def tanh(inp):
+        """
+        Tanh activation function
+        """
+        return (np.exp(inp) - np.exp(-inp)) / (np.exp(inp) + np.exp(-inp))
+
+    @staticmethod
+    def tanh_der(inp):
+        """
+        The derivative of the tanh activation function
+        """
+        return 1.0 - Utilities.tanh(inp)**2
+
+    @staticmethod
+    def linear(inp):
+        """
+        Tanh activation function
+        """
+        return inp
+
+    @staticmethod
+    def linear_der(inp):
+        """
+        The derivative of the tanh activation function
+        """
+        return np.ones(inp.shape)
+
+    @staticmethod
     def softmax(inp):
         """
         Softmax of the 'inp' vector. If inp is list of vectors,
