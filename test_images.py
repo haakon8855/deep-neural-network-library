@@ -89,7 +89,10 @@ class TestImages():
 
 
 if __name__ == "__main__":
-    test_images = TestImages("config1.ini")
-    # test_images = TestImages("config2.ini")
-    # test_images = TestImages("config3.ini")
+    test_images = TestImages("config1.ini")  # 3 hidden layers
+    # test_images = TestImages("config2.ini") # 0 hidden layers
+    # test_images = TestImages("config3.ini") # 5 hidden layers
+
+    # # Identical to config1.ini but without softmax, and mse instead of cross_entropy
+    # test_images = TestImages("config4.ini")  # 3 hidden layers
     test_images.main()
