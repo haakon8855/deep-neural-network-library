@@ -27,6 +27,8 @@ class TestImages():
         self.noise = float(self.config['GLOBALS']['noise'])
         self.centered = self.config['GLOBALS']['centered'] == 'true'
         self.data_set_size = int(self.config['GLOBALS']['data_set_size'])
+        self.train_size = float(self.config['GLOBALS']['train_size'])
+        self.valid_size = float(self.config['GLOBALS']['valid_size'])
 
         generator = DataGenerator(self.image_size,
                                   self.min_width,
@@ -34,6 +36,8 @@ class TestImages():
                                   self.min_height,
                                   self.max_height,
                                   self.noise,
+                                  split=(self.train_size, self.valid_size, 1 -
+                                         (self.train_size + self.valid_size)),
                                   centered=self.centered)
         self.train, self.validation, self.test = generator.generate_images(
             self.data_set_size)
