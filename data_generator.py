@@ -216,11 +216,16 @@ class DataGenerator():
         """
         Visualizes the images in one specified data set using matplotlib.
         """
-        fig, axs = plt.subplots(2, 5)
+        rows, cols = 2, 5
+        fig, axs = plt.subplots(rows, cols)
         fig.canvas.set_window_title(title)
         fig.suptitle(title)
+        images_indices = np.random.choice(len(data_set),
+                                          size=rows * cols,
+                                          replace=False)
         for i, axis in enumerate(axs.flat):
-            axis.imshow(data_set[i])
+            axis.imshow(data_set[images_indices[i]])
+            axis.set_title(f"No. {images_indices[i]}", fontsize=9)
             axis.get_xaxis().set_visible(False)
             axis.get_yaxis().set_visible(False)
         plt.show()
