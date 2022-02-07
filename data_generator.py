@@ -23,7 +23,7 @@ class DataGenerator():
         if (n < 10 or n > 50):
             print(f"Parameter not within range: n={n}!")
         if seed is not None:
-            random.seed(seed)
+            random.seed(seed)  # Set random seed if specified
         self.size = n
         self.min_dim = (min_width, min_height)
         self.max_dim = (max_width, max_height)
@@ -45,6 +45,7 @@ class DataGenerator():
             source_list = self.images_flattened
         else:
             source_list = self.images
+        # Split image list into train, validation and test sets before returning
         after_train = len(source_list) * self.split[0]
         after_validation = len(source_list) * (self.split[0] + self.split[1])
         train_x = np.array(source_list[:int(after_train)])
@@ -71,6 +72,7 @@ class DataGenerator():
             image, classes = self.generate_one_image()
             self.images.append(image)
             self.images_flattened.append(image.flatten())
+            # Use one-hot encoding for image classes
             classification = [0, 0, 0, 0]
             classification[classes] = 1
             self.classes.append(classification)
@@ -122,6 +124,7 @@ class DataGenerator():
         image = np.zeros((self.size, self.size))
         for i in range(self.size):
             for j in range(self.size):
+                # Circle equation to color the correct pixels
                 circle = np.abs((i - center[0])**2 + (j - center[1])**2 -
                                 radius**2)
                 if circle <= radius:
@@ -136,8 +139,10 @@ class DataGenerator():
         box_x, box_y, box_width, box_height = self.get_bounding_box()
 
         image = np.zeros((self.size, self.size))
+        # Horizontal lines in the rectangle
         image[box_y][box_x:box_x + box_width - 1] = 1
         image[box_y + box_height - 1][box_x:box_x + box_width] = 1
+        # Vertical lines in the rectangle
         for y_pos in range(box_y, box_y + box_height):
             image[y_pos][box_x] = 1
             image[y_pos][box_x + box_width - 1] = 1
@@ -156,6 +161,7 @@ class DataGenerator():
         point_c = (box_y + box_height - 1, box_x)  # Lower left of rect
 
         image = np.zeros((self.size, self.size))
+        # Use external library bresenham to color the correct pixels
         a_to_b = list(bresenham(point_a[1], point_a[0], point_b[1],
                                 point_b[0]))
         b_to_c = list(bresenham(point_b[1], point_b[0], point_c[1],
@@ -176,7 +182,9 @@ class DataGenerator():
         horizontal_y = (box_y + (box_y + box_height)) // 2
 
         image = np.zeros((self.size, self.size))
+        # Horizontal line
         image[horizontal_y][box_x:box_x + box_width] = 1
+        # Vertical line
         for y_pos in range(box_y, box_y + box_height):
             image[y_pos][vertical_x] = 1
         return image
@@ -185,6 +193,7 @@ class DataGenerator():
         """
         Adds noise to an image according to the noise level parameter.
         """
+        # Number of pixels to flip
         noise_pixels = int(self.noise * (self.size**2))
         for _ in range(noise_pixels):
             rand_x = random.randint(0, self.size - 1)
@@ -198,6 +207,7 @@ class DataGenerator():
         matplotlib.
         """
         train, validation, test = self.get_images(flattened=False)
+        # data_set[0] is image, data_set[1] is class
         self.visualize_one_data_set(train[0], 'Training set')
         self.visualize_one_data_set(validation[0], 'Validation set')
         self.visualize_one_data_set(test[0], 'Test set')

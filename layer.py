@@ -71,16 +71,25 @@ class Layer():
             J_l_wb (delta for bias weights),
             J_l_y (J_l_z for upstream layer)
         """
-        # Compute Jacobian matrices
+        # Compute diagonal vector for J_z_sum
         derivative = self.activation_func_der(self.z_sum)
+        # J_z_sum is the matrix containing 'derivative' along its diagonal
         j_z_sum = np.eye(derivative.shape[1]) * derivative[:, np.newaxis, :]
+        # J_z_y is matmul of J_z_sum and the transposed weight matrix
         j_z_y = j_z_sum @ self.weights.T
 
+        # J_z_w is the outer product product of the inputs
+        # and the diagonal of J_z_sum
         j_z_w = np.einsum('ij,ik->ijk', self.input_values, derivative)
+        # Same goes for the bias weights
         j_z_wb = np.einsum('j,ik->ijk', [1], derivative)
 
+        # J_l_w (weight gradients) is the multiplication between J_l_z and J_z_w
         j_l_w = j_l_z[:, np.newaxis, :] * j_z_w
+        # Same goes for the bias weight gradient
         j_l_wb = j_l_z[:, np.newaxis, :] * j_z_wb
+        # J_l_y is matmul of J_l_z and J_z_y
+        # J_l_y is J_l_z for the upstream layer
         j_l_y = np.einsum('ij,ijk->ik', j_l_z, j_z_y)
         return j_l_w, j_l_wb, j_l_y
 
@@ -94,13 +103,12 @@ class Layer():
         self.input_values = input_values
         self.z_sum = np.einsum("ij,kj->ki", self.weights.T,
                                self.input_values) + self.biases.reshape(1, -1)
-
-        # We store the temporary values
         self.activations = self.activation_func(self.z_sum).astype(np.float32)
 
-        # And return the output
+        # Return the downstream layer's return value from its forward pass
         if self.next_layer is not None:
             return self.next_layer.forward_pass(self.activations)
+        # Return the activations from this layer if it is the last layer
         return self.activations
 
     def update_weights(self, delta_w, delta_b):

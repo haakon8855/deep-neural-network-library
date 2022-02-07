@@ -13,23 +13,28 @@ class TestImages():
     """
     def __init__(self, config_file: str):
         self.config = Config.get_config(config_file)
-        self.epochs = int(self.config['GLOBALS']['epochs'])
-        self.batch_size = int(self.config['GLOBALS']['batch_size'])
-        self.verbose = self.config['GLOBALS']['verbose'] == 'true'
-        self.wrt = self.config['GLOBALS']['wrt']
-        self.wreg = float(self.config['GLOBALS']['wreg'])
 
-        self.image_size = int(self.config['GLOBALS']['image_size'])
-        self.min_width = int(self.config['GLOBALS']['min_width'])
-        self.max_width = int(self.config['GLOBALS']['max_width'])
-        self.min_height = int(self.config['GLOBALS']['min_height'])
-        self.max_height = int(self.config['GLOBALS']['max_height'])
-        self.noise = float(self.config['GLOBALS']['noise'])
-        self.centered = self.config['GLOBALS']['centered'] == 'true'
-        self.data_set_size = int(self.config['GLOBALS']['data_set_size'])
-        self.train_size = float(self.config['GLOBALS']['train_size'])
-        self.valid_size = float(self.config['GLOBALS']['valid_size'])
+        # Fetch network config
+        global_conf = self.config['GLOBALS']
+        self.epochs = int(global_conf['epochs'])
+        self.batch_size = int(global_conf['batch_size'])
+        self.verbose = global_conf['verbose'] == 'true'
+        self.wrt = global_conf['wrt']
+        self.wreg = float(global_conf['wreg'])
 
+        # Fetch image generation config
+        self.image_size = int(global_conf['image_size'])
+        self.min_width = int(global_conf['min_width'])
+        self.max_width = int(global_conf['max_width'])
+        self.min_height = int(global_conf['min_height'])
+        self.max_height = int(global_conf['max_height'])
+        self.noise = float(global_conf['noise'])
+        self.centered = global_conf['centered'] == 'true'
+        self.data_set_size = int(global_conf['data_set_size'])
+        self.train_size = float(global_conf['train_size'])
+        self.valid_size = float(global_conf['valid_size'])
+
+        # Initialize data generator
         generator = DataGenerator(self.image_size,
                                   self.min_width,
                                   self.max_width,
@@ -42,13 +47,14 @@ class TestImages():
         self.train, self.validation, self.test = generator.generate_images(
             self.data_set_size)
 
+        # Initialize network
         self.network = Network(self.config,
                                self.train,
                                self.validation,
                                self.test,
                                wrt=self.wrt,
                                wreg=self.wreg)
-        if self.config['GLOBALS']['show_images'] == 'true':
+        if global_conf['show_images'] == 'true':
             generator.visualize_all()
 
     def main(self):
@@ -94,8 +100,8 @@ class TestImages():
 
 if __name__ == "__main__":
     test_images = TestImages("config1.ini")  # 3 hidden layers
-    # test_images = TestImages("config2.ini") # 0 hidden layers
-    # test_images = TestImages("config3.ini") # 5 hidden layers
+    # test_images = TestImages("config2.ini")  # 0 hidden layers
+    # test_images = TestImages("config3.ini")  # 5 hidden layers
 
     # # Identical to config1.ini but without softmax, and mse instead of cross_entropy
     # test_images = TestImages("config4.ini")  # 3 hidden layers

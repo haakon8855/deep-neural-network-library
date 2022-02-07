@@ -43,23 +43,35 @@ class Network():
         """
         Create the layer-class instances and add them to the list of layers.
         """
+        # Output size of last layer = number of input values in following layer
         prev_layer_output_size = int(self.config['GLOBALS']["input"])
+
+        # Set correct loss funtion
         if self.config['GLOBALS']["loss"] == "cross_entropy":
             self.loss_func = utils.cross_entropy
             self.loss_func_der = utils.cross_entropy_der
         else:
             self.loss_func = utils.mse
             self.loss_func_der = utils.mse_der
+
+        # Set whether to use softmax or not after last normal layer
         self.use_softmax = self.config['GLOBALS']["softmax"] == "true"
+
+        # For each label in the config following the 'GLOBALS' label
         for layer_section in self.config.sections()[1:]:
             layer = self.config[layer_section]
+            # Fetch config info specific to each layer
             input_size = int(prev_layer_output_size)
             output_size = int(layer["size"])
             weight_range = (float(layer["wr_start"]), float(layer["wr_end"]))
             bias_range = (float(layer["br_start"]), float(layer["br_end"]))
+
             lrate = self.lrate
+            # if the layer has its own specified learning rate then use that
             if "lrate" in layer:
                 lrate = float(layer["lrate"])
+
+            # Set the layer's activation function
             if layer["activation"] == "sigmoid":
                 activation_func = utils.sigmoid
                 activation_func_der = utils.sigmoid_der
@@ -72,6 +84,8 @@ class Network():
             elif layer["activation"] == "linear":
                 activation_func = utils.linear
                 activation_func_der = utils.linear_der
+
+            # Initialize the layer using the information from the config
             self.layers.append(
                 Layer(input_dimensions=input_size,
                       num_nodes=output_size,
@@ -80,7 +94,10 @@ class Network():
                       bias_range=bias_range,
                       activation_func=activation_func,
                       activation_func_der=activation_func_der))
+            # Stores the output size for use as input size in the next layer
             prev_layer_output_size = output_size
+
+        # Set reference to downstream layer for all layers, except the last one
         for i in range(0, len(self.layers) - 1):
             self.layers[i].set_next_layer(self.layers[i + 1])
 
@@ -90,7 +107,9 @@ class Network():
         Returns time to train.
         """
         start_time = time()
+        # For each epoch
         for _ in range(epochs):
+            # For each minibatch in epoch
             for i in range(0, len(self.train_x), batch_size):
                 if i >= len(self.train_x) - batch_size:
                     minibatch_x = self.train_x[i:]
@@ -98,7 +117,10 @@ class Network():
                 else:
                     minibatch_x = self.train_x[i:i + batch_size]
                     minibatch_y = self.train_y[i:i + batch_size]
+                # Run backprop on the current minibatch
                 self.backward_pass(minibatch_x, minibatch_y)
+            # Run forward pass on the validation set at the end of each
+            # epoch to be able to plot this after training is done.
             self.forward_pass(self.validation_x,
                               target=self.validation_y,
                               data_set=1)
@@ -118,22 +140,21 @@ class Network():
         # Compute initial jacobian from loss function to softmax-output
         tval = target_vals.reshape(target_vals.shape[0], -1)
         if self.use_softmax:
-            # j_l_s = utils.mse_der(prediction, tval)
             j_l_s = utils.cross_entropy_der(prediction, tval)
             # Compute j_s_z jacobian from softmax output to last layer output
             j_s_z = utils.j_soft(prediction)
             j_l_z = np.einsum('ij,ijk->ik', j_l_s, j_s_z)
         else:
             j_l_z = utils.mse_der(prediction, tval)
-        deltas = []
 
+        deltas = []  # List of each layer's calculated gradients
         # For j from n-1 to 0 (incl.) where n is number of layers
         for j in range(len(self.layers) - 1, -1, -1):
             layer = self.layers[j]
             # Perform the backward pass for layer j and get the jacobian
             # matrices and delta values for updating layer j's weights.
             delta_j, delta_jb, j_l_z = layer.backward_pass(j_l_z)
-            # Apply L2 regularization
+            # Apply weight regularization
             delta_j = self.add_regularization(delta_j, layer.weights)
             # Cache deltas in order to update them later
             deltas.append((delta_j, delta_jb))
