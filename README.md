@@ -1,2 +1,4 @@
-# neuralNetLibrary
-Create deep neural nets in python and run it on all your favourite data sets!
+# Deep Neural Network Library
+
+Using this library you can create deep neural networks of your choosing by
+defining config files. The networks can take in just about any input data. 
