@@ -227,7 +227,13 @@ class DataGenerator():
 
 
 if __name__ == "__main__":
-    GEN = DataGenerator(20, 5, 20, 5, 20, 0.01)
+    GEN = DataGenerator(n=50,
+                        min_width=5,
+                        max_width=50,
+                        min_height=5,
+                        max_height=50,
+                        noise=0.01,
+                        centered=False)
     (TRAIN_X,
      TRAIN_Y), (VAL_X, VAL_Y), (TEST_X,
                                 TEST_Y) = GEN.generate_images(10,
