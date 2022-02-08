@@ -4,7 +4,7 @@ import numpy as np
 from utilities import Utilities as utils
 
 
-class Layer():
+class Layer:
     """
     Layer-class containing the nodes in a layer and all their input-weights.
     It also stores the output-value of the nodes during forward pass.

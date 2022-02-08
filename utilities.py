@@ -3,7 +3,7 @@
 import numpy as np
 
 
-class Utilities():
+class Utilities:
     """
     Utilities class hosting loss functions, activation functions,
     and their derivatives.

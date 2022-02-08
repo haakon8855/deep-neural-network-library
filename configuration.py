@@ -3,7 +3,7 @@
 import configparser
 
 
-class Config():
+class Config:
     """
     Fetches the config from a file and returns it in json/py-dict format.
     """

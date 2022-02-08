@@ -7,7 +7,7 @@ from configuration import Config
 from data_generator import DataGenerator
 
 
-class TestImages():
+class TestImages:
     """
     Test class for running network on generated images.
     """

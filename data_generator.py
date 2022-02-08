@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
-class DataGenerator():
+class DataGenerator:
     """
     Generator class for generating data sets of nxn images.
     """

@@ -7,7 +7,7 @@ from layer import Layer
 from utilities import Utilities as utils
 
 
-class Network():
+class Network:
     """
     Network class containing all layers, and conducting training of the network.
     """
