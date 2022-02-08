@@ -99,13 +99,13 @@ class TestImages():
 
 
 if __name__ == "__main__":
-    test_images = TestImages("config1.ini")  # 3 hidden layers
-    # test_images = TestImages("config2.ini")  # 0 hidden layers
-    # test_images = TestImages("config3.ini")  # 5 hidden layers
+    test_images = TestImages("config/config1.ini")  # 3 hidden layers
+    # test_images = TestImages("config/config2.ini")  # 0 hidden layers
+    # test_images = TestImages("config/config3.ini")  # 5 hidden layers
 
-    # # Identical to config1.ini but without softmax, and mse instead of cross_entropy
-    # test_images = TestImages("config4.ini")  # 3 hidden layers
+    # Identical to config1.ini but without softmax, and mse instead of cross_entropy
+    # test_images = TestImages("config/config4.ini")  # 3 hidden layers
 
-    # # One hidden layer with 100 nodes run on 50x50 images
-    # test_images = TestImages("config5.ini")  # 1 hidden layer
+    # One hidden layer with 100 nodes run on 50x50 images
+    # test_images = TestImages("config/config5.ini")  # 1 hidden layer
     test_images.main()

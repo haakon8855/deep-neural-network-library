@@ -1,4 +1,4 @@
-"""haakoas"""
+"""haakon8855"""
 
 import numpy as np
 from utilities import Utilities as utils

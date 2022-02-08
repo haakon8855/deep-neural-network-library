@@ -1,4 +1,4 @@
-"""haakoas"""
+"""haakon8855"""
 
 import random
 from bresenham import bresenham
