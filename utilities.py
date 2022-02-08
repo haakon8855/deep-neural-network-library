@@ -4,6 +4,10 @@ import numpy as np
 
 
 class Utilities():
+    """
+    Utilities class hosting loss functions, activation functions,
+    and their derivatives.
+    """
     @staticmethod
     def mse(value, target):
         """
