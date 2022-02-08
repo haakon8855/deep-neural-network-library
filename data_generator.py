@@ -229,21 +229,3 @@ class DataGenerator():
             axis.get_xaxis().set_visible(False)
             axis.get_yaxis().set_visible(False)
         plt.show()
-
-
-if __name__ == "__main__":
-    GEN = DataGenerator(n=50,
-                        min_width=5,
-                        max_width=50,
-                        min_height=5,
-                        max_height=50,
-                        noise=0.01,
-                        centered=False)
-    (TRAIN_X,
-     TRAIN_Y), (VAL_X, VAL_Y), (TEST_X,
-                                TEST_Y) = GEN.generate_images(10,
-                                                              flattened=False)
-    for I, IMAGE in enumerate(TRAIN_X):
-        print(TRAIN_Y[I])
-        plt.imshow(IMAGE)
-        plt.show()
