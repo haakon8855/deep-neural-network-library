@@ -28,6 +28,7 @@ Clone the project to any local directory. From there, the network class can be i
 ## Configuration
 
 Most settings can be changed in the config files. The global parameters concerns configuration for the data generator and the network, while the definition of individual layers in the network are defined in the layer-section.
+Examples for config files can be found in [`config/`](config/).
 
 The syntax of the neural network config files is identical to Windows'
 .ini-files' syntax, where variables are defined on separate lines with an
