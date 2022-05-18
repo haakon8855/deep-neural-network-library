@@ -21,6 +21,7 @@ Clone the project to any local directory. From there, the network class can be i
 - Python 3.9 or higher
 - Numpy
 - Matplotlib
+- Configparser
 - Bresenham (tested ver. 0.2.1)
 
 `pip install numpy matplotlib bresenham`
